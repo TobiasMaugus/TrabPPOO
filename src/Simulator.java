@@ -268,22 +268,7 @@ public class Simulator
     // configuração de múltiplos lagos
     private java.util.List<int[]> lakes = new java.util.ArrayList<int[]>(); // each: {centerRow, centerCol, height, width}
 
-    public void configureLake(int centerRow, int centerCol, int height, int width) {
-        // compat: adiciona um lago
-        addLake(centerRow, centerCol, height, width);
-    }
-
-    public void addLake(int centerRow, int centerCol, int height, int width) {
-        lakes.add(new int[]{centerRow, centerCol, height, width});
-        if(field != null && updatedField != null) {
-            field.addLake(centerRow, centerCol, height, width);
-            updatedField.addLake(centerRow, centerCol, height, width);
-            seedFishInLake();
-            SeasonPhase phaseNow = context.getCurrentSeason();
-            view.setSeasonPhase(phaseNow);
-            view.showStatus(step, field, phaseNow != null ? phaseNow.getName() : null);
-        }
-    }
+ 
 
     private void seedFishInLake() {
         Random rand = context.getRandom();
