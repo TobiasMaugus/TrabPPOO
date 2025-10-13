@@ -36,7 +36,12 @@ public abstract class Animal {
      */
     protected int breed(SimulationContext context, int breedingAge, double probability, int maxLitterSize) {
         int births = 0;
-        if(canBreed(breedingAge) && context.getRandom().nextDouble() <= probability) {
+        double prob = probability;
+        SeasonPhase phase = context.getCurrentSeason();
+        if(phase != null) {
+            prob = probability * context.getSpeciesConfig().getBreedingMultiplierFor(phase.getName(), this.getClass());
+        }
+        if(canBreed(breedingAge) && context.getRandom().nextDouble() <= prob) {
             births = context.getRandom().nextInt(maxLitterSize) + 1;
         }
         return births;

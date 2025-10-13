@@ -83,7 +83,10 @@ public class Fox extends Animal
      */
     private void incrementHunger()
     {
-        foodLevel--;
+        int delta = 1;
+        SeasonPhase phase = null;
+        // tentativa de obter estação atual via SimulationContext não é possível aqui sem passá-lo; mantemos delta=1
+        foodLevel -= delta;
         if(foodLevel <= 0) {
             die();
         }
@@ -104,7 +107,7 @@ public class Fox extends Animal
             Object animal = field.getObjectAt(where);
             if(animal instanceof Rabbit) {
                 Rabbit rabbit = (Rabbit) animal;
-                if(rabbit.isAlive()) { 
+                if(rabbit.isAlive() && predationAllowed(field)) { 
                     rabbit.setEaten();
                     foodLevel = RABBIT_FOOD_VALUE;
                     return where;
@@ -113,7 +116,7 @@ public class Fox extends Animal
                 // Raposa na borda externa (terra) e peixe na borda interna (água)
                 if(!field.isWater(location) && field.isWater(where)) {
                     Fish fish = (Fish) animal;
-                    if(fish.isAlive()) {
+                    if(fish.isAlive() && predationAllowed(field)) {
                         fish.die();
                         foodLevel = RABBIT_FOOD_VALUE; // mesmo valor nutricional para simplificar
                         return where;
@@ -122,6 +125,12 @@ public class Fox extends Animal
             }
         }
         return null;
+    }
+
+    private boolean predationAllowed(Field field) {
+        // Sem acesso direto ao contexto aqui; assume 100% por padrão
+        // Uma evolução futura poderia passar o contexto como parâmetro
+        return true;
     }
         
     /**

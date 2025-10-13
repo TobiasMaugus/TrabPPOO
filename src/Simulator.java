@@ -38,6 +38,7 @@ public class Simulator
     // Contexto de simulação (Random e SpeciesConfig)
     private final SimulationContext context;
     private final SpeciesConfig speciesConfig;
+    private SeasonCycle seasonCycle;
     
     /**
      * Construct a simulation field with default size.
@@ -74,6 +75,9 @@ public class Simulator
         speciesConfig = config;
         context = new SimulationContext(random, speciesConfig);
         view = new SimulatorView(depth, width, speciesConfig);
+        // ciclo sazonal padrão
+        seasonCycle = defaultSeasonCycle();
+        context.setSeasonCycle(seasonCycle);
         
         // Setup a valid starting point.
         reset();
@@ -112,6 +116,7 @@ public class Simulator
     public void simulateOneStep()
     {
         step++;
+        context.setCurrentStep(step);
         newAnimals.clear();
         
         // let all animals act
@@ -133,7 +138,9 @@ public class Simulator
         updatedField.clear();
 
         // display the new field on screen
-        view.showStatus(step, field);
+        SeasonPhase phase = context.getCurrentSeason();
+        view.setSeasonPhase(phase);
+        view.showStatus(step, field, phase != null ? phase.getName() : null);
     }
         
     /**
@@ -145,37 +152,36 @@ public class Simulator
         animals.clear();
         field.clear();
         updatedField.clear();
-        // aplica lago configurado, se houver
-        if(lakeConfigured) {
-            field.setLake(lakeCenterRow, lakeCenterCol, lakeHeight, lakeWidth);
-            updatedField.setLake(lakeCenterRow, lakeCenterCol, lakeHeight, lakeWidth);
+        // aplica lagos configurados
+        for(int[] lake : lakes) {
+            field.addLake(lake[0], lake[1], lake[2], lake[3]);
+            updatedField.addLake(lake[0], lake[1], lake[2], lake[3]);
         }
         populate(field);
         
         // Show the starting state in the view.
-        view.showStatus(step, field);
+        SeasonPhase phase2 = context.getCurrentSeason();
+        view.setSeasonPhase(phase2);
+        view.showStatus(step, field, phase2 != null ? phase2.getName() : null);
     }
 
-    // configuração opcional de lago
-    private boolean lakeConfigured = false;
-    private int lakeCenterRow;
-    private int lakeCenterCol;
-    private int lakeHeight;
-    private int lakeWidth;
+    // configuração de múltiplos lagos
+    private java.util.List<int[]> lakes = new java.util.ArrayList<int[]>(); // each: {centerRow, centerCol, height, width}
 
     public void configureLake(int centerRow, int centerCol, int height, int width) {
-        this.lakeConfigured = true;
-        this.lakeCenterRow = centerRow;
-        this.lakeCenterCol = centerCol;
-        this.lakeHeight = height;
-        this.lakeWidth = width;
-        // aplica imediatamente ao estado atual
+        // compat: adiciona um lago
+        addLake(centerRow, centerCol, height, width);
+    }
+
+    public void addLake(int centerRow, int centerCol, int height, int width) {
+        lakes.add(new int[]{centerRow, centerCol, height, width});
         if(field != null && updatedField != null) {
-            field.setLake(lakeCenterRow, lakeCenterCol, lakeHeight, lakeWidth);
-            updatedField.setLake(lakeCenterRow, lakeCenterCol, lakeHeight, lakeWidth);
-            // remover quaisquer animais que porventura estivessem sobre água já é garantido por Field.setLake
+            field.addLake(centerRow, centerCol, height, width);
+            updatedField.addLake(centerRow, centerCol, height, width);
             seedFishInLake();
-            view.showStatus(step, field);
+            SeasonPhase phaseNow = context.getCurrentSeason();
+            view.setSeasonPhase(phaseNow);
+            view.showStatus(step, field, phaseNow != null ? phaseNow.getName() : null);
         }
     }
 
@@ -235,7 +241,20 @@ public class Simulator
         config.setColor(Fox.class, Color.blue);
         config.setColor(Rabbit.class, Color.orange);
         config.setColor(Fish.class, new Color(230, 0, 0));
-        config.setFishCreationProbability(0.09);
+        config.setFishCreationProbability(0.3);
+        // multiplicadores sazonais defaults (ex.: primavera=1.2, inverno=0.7)
+        config.setBreedingMultiplier("spring", 1.2);
+        config.setBreedingMultiplier("summer", 1.0);
+        config.setBreedingMultiplier("autumn", 0.9);
+        config.setBreedingMultiplier("winter", 0.7);
         return config;
+    }
+
+    private static SeasonCycle defaultSeasonCycle() {
+        SeasonPhase spring = new SeasonPhase("spring", 100, new Color(235, 255, 235), new Color(170, 210, 245));
+        SeasonPhase summer = new SeasonPhase("summer", 100, new Color(250, 250, 230), new Color(160, 200, 240));
+        SeasonPhase autumn = new SeasonPhase("autumn", 100, new Color(245, 235, 215), new Color(170, 205, 240));
+        SeasonPhase winter = new SeasonPhase("winter", 100, new Color(235, 240, 255), new Color(190, 225, 255));
+        return new SeasonCycle(new SeasonPhase[]{spring, summer, autumn, winter});
     }
 }

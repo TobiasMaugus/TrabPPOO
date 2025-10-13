@@ -7,6 +7,8 @@ import java.util.Random;
 public class SimulationContext {
     private final Random random;
     private final SpeciesConfig speciesConfig;
+    private SeasonCycle seasonCycle;
+    private int currentStep;
 
     public SimulationContext(Random random, SpeciesConfig speciesConfig) {
         this.random = random;
@@ -19,6 +21,19 @@ public class SimulationContext {
 
     public SpeciesConfig getSpeciesConfig() {
         return speciesConfig;
+    }
+
+    public void setSeasonCycle(SeasonCycle cycle) {
+        this.seasonCycle = cycle;
+    }
+
+    public void setCurrentStep(int step) {
+        this.currentStep = step;
+    }
+
+    public SeasonPhase getCurrentSeason() {
+        if(seasonCycle == null) return null;
+        return seasonCycle.getPhaseAtStep(currentStep);
     }
 }
 

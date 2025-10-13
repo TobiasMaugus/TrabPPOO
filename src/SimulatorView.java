@@ -16,15 +16,16 @@ import java.util.HashMap;
 public class SimulatorView extends JFrame
 {
     // Colors used for empty locations.
-    private static final Color EMPTY_COLOR = Color.white;
-    private static final Color WATER_COLOR = new Color(180, 220, 255);
+    private static final Color DEFAULT_EMPTY_COLOR = Color.white;
+    private static final Color DEFAULT_WATER_COLOR = new Color(180, 220, 255);
 
     // Color used for objects that have no defined color.
     private static final Color UNKNOWN_COLOR = Color.gray;
 
     private final String STEP_PREFIX = "Step: ";
+    private final String SEASON_PREFIX = "Season: ";
     private final String POPULATION_PREFIX = "Population: ";
-    private JLabel stepLabel, population;
+    private JLabel stepLabel, seasonLabel, population;
     private FieldView fieldView;
     
     // A map for storing colors for participants in the simulation
@@ -32,6 +33,7 @@ public class SimulatorView extends JFrame
     // A statistics object computing and storing simulation information
     private FieldStats stats;
     private final SpeciesConfig speciesConfig;
+    private SeasonPhase currentSeasonPhase;
 
     /**
      * Create a view of the given width and height.
@@ -44,6 +46,7 @@ public class SimulatorView extends JFrame
 
         setTitle("Fox and Rabbit Simulation");
         stepLabel = new JLabel(STEP_PREFIX, JLabel.CENTER);
+        seasonLabel = new JLabel(SEASON_PREFIX, JLabel.CENTER);
         population = new JLabel(POPULATION_PREFIX, JLabel.CENTER);
         
         setLocation(100, 50);
@@ -51,7 +54,10 @@ public class SimulatorView extends JFrame
         fieldView = new FieldView(height, width);
 
         Container contents = getContentPane();
-        contents.add(stepLabel, BorderLayout.NORTH);
+        JPanel topPanel = new JPanel(new GridLayout(2,1));
+        topPanel.add(stepLabel);
+        topPanel.add(seasonLabel);
+        contents.add(topPanel, BorderLayout.NORTH);
         contents.add(fieldView, BorderLayout.CENTER);
         contents.add(population, BorderLayout.SOUTH);
         pack();
@@ -82,12 +88,17 @@ public class SimulatorView extends JFrame
      * @param step Which iteration step it is.
      * @param stats Status of the field to be represented.
      */
-    public void showStatus(int step, Field field)
+    public void showStatus(int step, Field field, String seasonName)
     {
         if(!isVisible())
             setVisible(true);
 
         stepLabel.setText(STEP_PREFIX + step);
+        if(seasonName != null) {
+            seasonLabel.setText(SEASON_PREFIX + seasonName);
+        } else {
+            seasonLabel.setText(SEASON_PREFIX + "-");
+        }
 
         stats.reset();
         fieldView.preparePaint();
@@ -100,10 +111,10 @@ public class SimulatorView extends JFrame
                     fieldView.drawMark(col, row, getColor(animal.getClass()));
                 }
                 else if(field.isWater(row, col)) {
-                    fieldView.drawMark(col, row, WATER_COLOR);
+                    fieldView.drawMark(col, row, getSeasonalWaterColor());
                 }
                 else {
-                    fieldView.drawMark(col, row, EMPTY_COLOR);
+                    fieldView.drawMark(col, row, getSeasonalEmptyColor());
                 }
             }
         }
@@ -111,6 +122,20 @@ public class SimulatorView extends JFrame
 
         population.setText(POPULATION_PREFIX + stats.getPopulationDetails(field));
         fieldView.repaint();
+    }
+
+    public void setSeasonPhase(SeasonPhase phase) {
+        this.currentSeasonPhase = phase;
+    }
+
+    private Color getSeasonalEmptyColor() {
+        if(currentSeasonPhase != null) return currentSeasonPhase.getEmptyColor();
+        return DEFAULT_EMPTY_COLOR;
+    }
+
+    private Color getSeasonalWaterColor() {
+        if(currentSeasonPhase != null) return currentSeasonPhase.getWaterColor();
+        return DEFAULT_WATER_COLOR;
     }
 
     /**

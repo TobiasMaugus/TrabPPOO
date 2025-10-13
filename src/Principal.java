@@ -1,7 +1,8 @@
 public class Principal{
   public static void main(String[] args){
     Simulator simulator = new Simulator();
-    simulator.configureLake(25, 25, 25, 30); // centro (linha,coluna), altura, largura
+    simulator.addLake(20, 20, 10, 12);
+    simulator.addLake(30, 35, 8, 10);
     simulator.runLongSimulation();
     //simulator.simulate(300);
   }

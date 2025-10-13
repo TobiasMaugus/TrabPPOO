@@ -113,6 +113,14 @@ public class Field
         }
     }
 
+    /**
+     * Adiciona um lago adicional (sinônimo de setLake, mantendo múltiplas regiões).
+     */
+    public void addLake(int centerRow, int centerCol, int lakeHeight, int lakeWidth)
+    {
+        setLake(centerRow, centerCol, lakeHeight, lakeWidth);
+    }
+
     public boolean isWater(int row, int col)
     {
         return water[row][col];
