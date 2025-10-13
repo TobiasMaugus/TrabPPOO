@@ -35,6 +35,8 @@ public class Simulator
     private int step;
     // A graphical view of the simulation.
     private SimulatorView view;
+    private volatile boolean running = false;
+    private Thread simThread;
     // Contexto de simulação (Random e SpeciesConfig)
     private final SimulationContext context;
     private final SpeciesConfig speciesConfig;
@@ -74,7 +76,7 @@ public class Simulator
         // Create a view of the state of each location in the field.
         speciesConfig = config;
         context = new SimulationContext(random, speciesConfig);
-        view = new SimulatorView(depth, width, speciesConfig);
+        view = new SimulatorView(depth, width, speciesConfig, this);
         // ciclo sazonal padrão
         seasonCycle = defaultSeasonCycle();
         context.setSeasonCycle(seasonCycle);
@@ -89,7 +91,7 @@ public class Simulator
      */
     public void runLongSimulation()
     {
-        simulate(500);
+        // Não iniciar automaticamente; use os botões Play/Pause.
     }
     
     /**
@@ -98,14 +100,8 @@ public class Simulator
      */
     public void simulate(int numSteps)
     {
-        for(int step = 1; step <= numSteps && view.isViable(field); step++) {
-            simulateOneStep();
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-        }
+        // Mantido para compatibilidade, mas controle preferido é Play/Pause.
+        for(int step = 1; step <= numSteps && view.isViable(field); step++) simulateOneStep();
     }
     
     /**
@@ -163,6 +159,30 @@ public class Simulator
         SeasonPhase phase2 = context.getCurrentSeason();
         view.setSeasonPhase(phase2);
         view.showStatus(step, field, phase2 != null ? phase2.getName() : null);
+    }
+
+    public synchronized void startSimulation() {
+        if(running) return;
+        running = true;
+        simThread = new Thread(new Runnable(){
+            public void run() {
+                while(running && view.isViable(field)) {
+                    simulateOneStep();
+                    try { Thread.sleep(100); } catch (InterruptedException e) { Thread.currentThread().interrupt(); break; }
+                }
+                running = false;
+            }
+        }, "SimLoop");
+        simThread.setDaemon(true);
+        simThread.start();
+    }
+
+    public synchronized void pauseSimulation() {
+        running = false;
+    }
+
+    public synchronized boolean isRunning() {
+        return running;
     }
 
     // configuração de múltiplos lagos
@@ -247,6 +267,8 @@ public class Simulator
         config.setBreedingMultiplier("summer", 1.0);
         config.setBreedingMultiplier("autumn", 0.9);
         config.setBreedingMultiplier("winter", 0.7);
+        // Peixes não reproduzem no inverno
+        config.setBreedingMultiplierFor("winter", Fish.class, 0.0);
         return config;
     }
 

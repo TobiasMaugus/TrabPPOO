@@ -27,6 +27,7 @@ public class SimulatorView extends JFrame
     private final String POPULATION_PREFIX = "Population: ";
     private JLabel stepLabel, seasonLabel, population;
     private FieldView fieldView;
+    private JPanel legendPanel;
     
     // A map for storing colors for participants in the simulation
     private HashMap colors;
@@ -38,28 +39,61 @@ public class SimulatorView extends JFrame
     /**
      * Create a view of the given width and height.
      */
-    public SimulatorView(int height, int width, SpeciesConfig speciesConfig)
+    public SimulatorView(int height, int width, SpeciesConfig speciesConfig, Simulator simulator)
     {
         this.speciesConfig = speciesConfig;
         stats = new FieldStats();
         colors = new HashMap();
 
-        setTitle("Fox and Rabbit Simulation");
+        setTitle("Predator/Prey Simulation");
         stepLabel = new JLabel(STEP_PREFIX, JLabel.CENTER);
         seasonLabel = new JLabel(SEASON_PREFIX, JLabel.CENTER);
         population = new JLabel(POPULATION_PREFIX, JLabel.CENTER);
         
         setLocation(100, 50);
+        setSize(1000, 1000);
         
         fieldView = new FieldView(height, width);
 
         Container contents = getContentPane();
-        JPanel topPanel = new JPanel(new GridLayout(2,1));
-        topPanel.add(stepLabel);
-        topPanel.add(seasonLabel);
+        JPanel topPanel = new JPanel(new GridLayout(3,1));
+        JPanel statusPanel = new JPanel(new GridLayout(1,2));
+        statusPanel.add(stepLabel);
+        statusPanel.add(seasonLabel);
+        JPanel controls = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JButton playPause = new JButton("PLAY");
+        JButton resetBtn = new JButton("RESET");
+        playPause.addActionListener(new ActionListener(){
+            public void actionPerformed(ActionEvent e){
+                if(simulator.isRunning()) {
+                    simulator.pauseSimulation();
+                    playPause.setText("PLAY");
+                } else {
+                    simulator.startSimulation();
+                    playPause.setText("PAUSE");
+                }
+            }
+        });
+        resetBtn.addActionListener(new ActionListener(){
+            public void actionPerformed(ActionEvent e){
+                simulator.pauseSimulation();
+                simulator.reset();
+                playPause.setText("PLAY");
+            }
+        });
+        controls.add(playPause);
+        controls.add(resetBtn);
+        topPanel.add(statusPanel);
+        topPanel.add(controls);
         contents.add(topPanel, BorderLayout.NORTH);
         contents.add(fieldView, BorderLayout.CENTER);
+        // Legenda na lateral direita
+        legendPanel = new JPanel();
+        legendPanel.setLayout(new BoxLayout(legendPanel, BoxLayout.Y_AXIS));
+        contents.add(new JScrollPane(legendPanel), BorderLayout.EAST);
+        // Oculta a linha de população textual na base
         contents.add(population, BorderLayout.SOUTH);
+        population.setVisible(false);
         pack();
         setVisible(true);
     }
@@ -102,6 +136,7 @@ public class SimulatorView extends JFrame
 
         stats.reset();
         fieldView.preparePaint();
+        java.util.Map<Class, Integer> counts = new java.util.HashMap<Class, Integer>();
             
         for(int row = 0; row < field.getDepth(); row++) {
             for(int col = 0; col < field.getWidth(); col++) {
@@ -109,6 +144,8 @@ public class SimulatorView extends JFrame
                 if(animal != null) {
                     stats.incrementCount(animal.getClass());
                     fieldView.drawMark(col, row, getColor(animal.getClass()));
+                    Integer c = counts.get(animal.getClass());
+                    counts.put(animal.getClass(), c == null ? 1 : c + 1);
                 }
                 else if(field.isWater(row, col)) {
                     fieldView.drawMark(col, row, getSeasonalWaterColor());
@@ -120,8 +157,39 @@ public class SimulatorView extends JFrame
         }
         stats.countFinished();
 
-        population.setText(POPULATION_PREFIX + stats.getPopulationDetails(field));
+        // Atualiza legenda lateral
+        updateLegend(counts);
         fieldView.repaint();
+    }
+
+    private void updateLegend(java.util.Map<Class, Integer> counts) {
+        legendPanel.removeAll();
+        // Sempre mostra todas as espécies conhecidas, mesmo com contagem 0
+        java.util.Set<Class> allSpecies = new java.util.HashSet<Class>();
+        allSpecies.add(Fox.class);
+        allSpecies.add(Rabbit.class);
+        allSpecies.add(Fish.class);
+        allSpecies.addAll(counts.keySet());
+        java.util.List<Class> keys = new java.util.ArrayList<Class>(allSpecies);
+        java.util.Collections.sort(keys, new java.util.Comparator<Class>(){
+            public int compare(Class a, Class b) { return a.getSimpleName().compareTo(b.getSimpleName()); }
+        });
+        for(Class cls : keys) {
+            int count = counts.containsKey(cls) ? counts.get(cls).intValue() : 0;
+            JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT));
+            JPanel swatch = new JPanel();
+            swatch.setBackground(getColor(cls));
+            swatch.setPreferredSize(new Dimension(16,16));
+            swatch.setMinimumSize(new Dimension(16,16));
+            swatch.setMaximumSize(new Dimension(16,16));
+            row.add(swatch);
+            row.add(Box.createHorizontalStrut(8));
+            JLabel label = new JLabel(cls.getSimpleName() + " - " + count);
+            row.add(label);
+            legendPanel.add(row);
+        }
+        legendPanel.revalidate();
+        legendPanel.repaint();
     }
 
     public void setSeasonPhase(SeasonPhase phase) {
@@ -157,7 +225,7 @@ public class SimulatorView extends JFrame
      */
     private class FieldView extends JPanel
     {
-        private final int GRID_VIEW_SCALING_FACTOR = 6;
+        private final int GRID_VIEW_SCALING_FACTOR = 10;
 
         private int gridWidth, gridHeight;
         private int xScale, yScale;
