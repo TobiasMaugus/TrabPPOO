@@ -1,0 +1,28 @@
+# Configuração de simulação - arquivo de exemplo
+# Dimensões do grid
+GRID_WIDTH=60
+GRID_HEIGHT=40
+
+# Número máximo de steps
+MAX_STEPS=1000
+
+# Definição de estações
+# Formato: SEASON=nome,duração,r,g,b,r,g,b (cores: empty, water)
+SEASON=spring,150,235,255,235,0,0,0
+SEASON=summer,120,250,250,230,160,200,240
+SEASON=autumn,100,245,235,215,170,205,240
+SEASON=winter,80,235,240,255,190,225,255
+
+# Definição de lagos
+# Formato: LAKE=centerRow,centerCol,height,width
+LAKE=20,20,10,12
+LAKE=40,35,8,10
+
+# Taxas específicas por espécie e estação
+# Formato: SPECIES_RATE=speciesName,seasonName,breedingRate,predationSusceptibility,foodAvailability
+# Peixes não reproduzem no inverno (exemplo atual do projeto)
+SPECIES_RATE=fish,winter,0.1,0.1,1.0
+# Raposas têm menos sucesso de predação no inverno
+SPECIES_RATE=fox,winter,0.7,1.0,0.5
+# Coelhos reproduzem mais na primavera
+SPECIES_RATE=rabbit,spring,1.5,1.0,1.0

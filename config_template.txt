@@ -1,0 +1,26 @@
+﻿# TEMPLATE de configuracao (.txt) para a simulacao
+# Linhas em branco e linhas iniciadas com # sao ignoradas
+# DIMENSOES DO GRID: largura e altura (numero de celulas)
+GRID_WIDTH=50
+GRID_HEIGHT=50
+
+# NUMERO MAXIMO DE STEPS DA SIMULACAO (usado quando voce nao usar os botoes)
+MAX_STEPS=500
+
+# ESTACOES: nome,duracao_em_steps,emptyR,emptyG,emptyB,waterR,waterG,waterB
+# Exemplo: SEASON=spring,150,235,255,235,170,210,245
+SEASON=nome,duracao,emptyR,emptyG,emptyB,waterR,waterG,waterB
+
+# LAGOS: centro_linha,centro_coluna,altura,largura
+# Exemplo: LAKE=20,20,10,12
+LAKE=row,col,height,width
+
+# TAXAS ESPECIFICAS POR ESPECIE E ESTACAO:
+# speciesName: fox|rabbit|fish (minusc.)
+# seasonName: deve bater com o nome definido em SEASON acima
+# breedingRate: multiplicador de reproducao (0.0=nao reproduz; 1.0=normal; >1.0=mais)
+# predationSusceptibility: multiplicador de suscetibilidade (0.0=imune; 1.0=normal) [reservado]
+# foodAvailability: fator de disponibilidade de alimento para predadores (0.5=menos; 1.0=normal) [reservado]
+# Exemplo: peixes nao reproduzem no inverno
+# SPECIES_RATE=fish,winter,0.0,0.0,1.0
+SPECIES_RATE=speciesName,seasonName,breedingRate,predationSusceptibility,foodAvailability

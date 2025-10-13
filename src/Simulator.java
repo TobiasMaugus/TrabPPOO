@@ -37,6 +37,7 @@ public class Simulator
     private SimulatorView view;
     private volatile boolean running = false;
     private Thread simThread;
+    private volatile int speedLevel = 1; // 1-15, onde sleep = 10 + (level-1) * 66ms
     // Contexto de simulação (Random e SpeciesConfig)
     private final SimulationContext context;
     private final SpeciesConfig speciesConfig;
@@ -168,7 +169,13 @@ public class Simulator
             public void run() {
                 while(running && view.isViable(field)) {
                     simulateOneStep();
-                    try { Thread.sleep(100); } catch (InterruptedException e) { Thread.currentThread().interrupt(); break; }
+                    try { 
+                        int sleepTime = 10 + (speedLevel - 1) * 66; // 10ms + (level-1) * 66ms
+                        Thread.sleep(sleepTime); 
+                    } catch (InterruptedException e) { 
+                        Thread.currentThread().interrupt(); 
+                        break; 
+                    }
                 }
                 running = false;
             }
@@ -183,6 +190,79 @@ public class Simulator
 
     public synchronized boolean isRunning() {
         return running;
+    }
+    
+    public synchronized void increaseSpeed() {
+        if (speedLevel < 15) speedLevel++;
+    }
+    
+    public synchronized void increaseSpeedBy5() {
+        speedLevel = Math.min(15, speedLevel + 5);
+    }
+    
+    public synchronized void decreaseSpeed() {
+        if (speedLevel > 1) speedLevel--;
+    }
+    
+    public synchronized void decreaseSpeedBy5() {
+        speedLevel = Math.max(1, speedLevel - 5);
+    }
+    
+    public synchronized int getSpeedLevel() {
+        return speedLevel;
+    }
+    
+    public void loadConfiguration(String configFilePath) throws Exception {
+        SimulationConfig config = SimulationConfigLoader.loadFromFile(configFilePath);
+        
+        // Pausa simulação atual
+        pauseSimulation();
+        
+        // Recria o simulador com novas dimensões
+        animals.clear();
+        field = new Field(config.getGridHeight(), config.getGridWidth());
+        updatedField = new Field(config.getGridHeight(), config.getGridWidth());
+        
+        // Recria ciclo sazonal se configurado
+        if (!config.getSeasons().isEmpty()) {
+            SeasonPhase[] phases = new SeasonPhase[config.getSeasons().size()];
+            for (int i = 0; i < config.getSeasons().size(); i++) {
+                SimulationConfig.SeasonConfig sc = config.getSeasons().get(i);
+                phases[i] = new SeasonPhase(sc.getName(), sc.getDurationSteps(), sc.getEmptyColor(), sc.getWaterColor());
+            }
+            seasonCycle = new SeasonCycle(phases);
+            context.setSeasonCycle(seasonCycle);
+        }
+        
+        // Aplica taxas específicas de espécies por estação
+        for (SimulationConfig.SpeciesRateConfig rateConfig : config.getSpeciesRates()) {
+            Class<?> speciesClass = getSpeciesClass(rateConfig.getSpeciesName());
+            if (speciesClass != null) {
+                speciesConfig.setBreedingMultiplierFor(rateConfig.getSeasonName(), speciesClass, rateConfig.getBreedingRate());
+                speciesConfig.setPredationSusceptibility(rateConfig.getSeasonName(), speciesClass, rateConfig.getPredationSusceptibility());
+                speciesConfig.setFoodAvailabilityFactor(rateConfig.getSeasonName(), speciesClass, rateConfig.getFoodAvailability());
+            }
+        }
+        
+        // Limpa lagos antigos e aplica novos do arquivo
+        lakes.clear();
+        for (SimulationConfig.LakeConfig lakeConfig : config.getLakes()) {
+            lakes.add(new int[]{lakeConfig.getCenterRow(), lakeConfig.getCenterCol(), lakeConfig.getHeight(), lakeConfig.getWidth()});
+            field.addLake(lakeConfig.getCenterRow(), lakeConfig.getCenterCol(), lakeConfig.getHeight(), lakeConfig.getWidth());
+            updatedField.addLake(lakeConfig.getCenterRow(), lakeConfig.getCenterCol(), lakeConfig.getHeight(), lakeConfig.getWidth());
+        }
+        
+        // Reinicia
+        reset();
+    }
+    
+    private Class<?> getSpeciesClass(String speciesName) {
+        switch (speciesName.toLowerCase()) {
+            case "fox": return Fox.class;
+            case "rabbit": return Rabbit.class;
+            case "fish": return Fish.class;
+            default: return null;
+        }
     }
 
     // configuração de múltiplos lagos

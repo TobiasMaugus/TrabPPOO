@@ -25,7 +25,7 @@ public class SimulatorView extends JFrame
     private final String STEP_PREFIX = "Step: ";
     private final String SEASON_PREFIX = "Season: ";
     private final String POPULATION_PREFIX = "Population: ";
-    private JLabel stepLabel, seasonLabel, population;
+    private JLabel stepLabel, seasonLabel, population, configFileLabel, speedLabel;
     private FieldView fieldView;
     private JPanel legendPanel;
     
@@ -34,6 +34,7 @@ public class SimulatorView extends JFrame
     // A statistics object computing and storing simulation information
     private FieldStats stats;
     private final SpeciesConfig speciesConfig;
+    private final Simulator simulator;
     private SeasonPhase currentSeasonPhase;
 
     /**
@@ -42,6 +43,7 @@ public class SimulatorView extends JFrame
     public SimulatorView(int height, int width, SpeciesConfig speciesConfig, Simulator simulator)
     {
         this.speciesConfig = speciesConfig;
+        this.simulator = simulator;
         stats = new FieldStats();
         colors = new HashMap();
 
@@ -49,20 +51,30 @@ public class SimulatorView extends JFrame
         stepLabel = new JLabel(STEP_PREFIX, JLabel.CENTER);
         seasonLabel = new JLabel(SEASON_PREFIX, JLabel.CENTER);
         population = new JLabel(POPULATION_PREFIX, JLabel.CENTER);
+        configFileLabel = new JLabel("Config: (default)", JLabel.CENTER);
+        speedLabel = new JLabel("Speed: 1 (10ms)", JLabel.CENTER);
         
         setLocation(100, 50);
-        setSize(1000, 1000);
         
         fieldView = new FieldView(height, width);
 
         Container contents = getContentPane();
-        JPanel topPanel = new JPanel(new GridLayout(3,1));
+        JPanel topPanel = new JPanel(new GridLayout(5,1));
         JPanel statusPanel = new JPanel(new GridLayout(1,2));
         statusPanel.add(stepLabel);
         statusPanel.add(seasonLabel);
+        JPanel configPanel = new JPanel(new GridLayout(1,1));
+        configPanel.add(configFileLabel);
         JPanel controls = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JButton loadConfigBtn = new JButton("LOAD CONFIG");
         JButton playPause = new JButton("PLAY");
         JButton resetBtn = new JButton("RESET");
+        
+        // Botões de velocidade
+        JButton speedUp1 = new JButton("+1");
+        JButton speedUp5 = new JButton("+5");
+        JButton speedDown1 = new JButton("-1");
+        JButton speedDown5 = new JButton("-5");
         playPause.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent e){
                 if(simulator.isRunning()) {
@@ -81,9 +93,60 @@ public class SimulatorView extends JFrame
                 playPause.setText("PLAY");
             }
         });
+        loadConfigBtn.addActionListener(new ActionListener(){
+            public void actionPerformed(ActionEvent e){
+                JFileChooser chooser = new JFileChooser();
+                chooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("Text files", "txt"));
+                if (chooser.showOpenDialog(SimulatorView.this) == JFileChooser.APPROVE_OPTION) {
+                    try {
+                        simulator.loadConfiguration(chooser.getSelectedFile().getAbsolutePath());
+                        configFileLabel.setText("Config: " + chooser.getSelectedFile().getName());
+                    } catch (Exception ex) {
+                        JOptionPane.showMessageDialog(SimulatorView.this, "Error loading config: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            }
+        });
+        
+        // ActionListeners para botões de velocidade
+        speedUp1.addActionListener(new ActionListener(){
+            public void actionPerformed(ActionEvent e){
+                simulator.increaseSpeed();
+                updateSpeedLabel();
+            }
+        });
+        speedUp5.addActionListener(new ActionListener(){
+            public void actionPerformed(ActionEvent e){
+                simulator.increaseSpeedBy5();
+                updateSpeedLabel();
+            }
+        });
+        speedDown1.addActionListener(new ActionListener(){
+            public void actionPerformed(ActionEvent e){
+                simulator.decreaseSpeed();
+                updateSpeedLabel();
+            }
+        });
+        speedDown5.addActionListener(new ActionListener(){
+            public void actionPerformed(ActionEvent e){
+                simulator.decreaseSpeedBy5();
+                updateSpeedLabel();
+            }
+        });
+        controls.add(loadConfigBtn);
         controls.add(playPause);
         controls.add(resetBtn);
+        controls.add(speedUp1);
+        controls.add(speedUp5);
+        controls.add(speedDown1);
+        controls.add(speedDown5);
+        
+        JPanel speedPanel = new JPanel(new GridLayout(1,1));
+        speedPanel.add(speedLabel);
+        
         topPanel.add(statusPanel);
+        topPanel.add(configPanel);
+        topPanel.add(speedPanel);
         topPanel.add(controls);
         contents.add(topPanel, BorderLayout.NORTH);
         contents.add(fieldView, BorderLayout.CENTER);
@@ -162,6 +225,12 @@ public class SimulatorView extends JFrame
         fieldView.repaint();
     }
 
+    private void updateSpeedLabel() {
+        int level = simulator.getSpeedLevel();
+        int ms = 10 + (level - 1) * 66;
+        speedLabel.setText("Speed: " + level + " (" + ms + "ms)");
+    }
+    
     private void updateLegend(java.util.Map<Class, Integer> counts) {
         legendPanel.removeAll();
         // Sempre mostra todas as espécies conhecidas, mesmo com contagem 0
