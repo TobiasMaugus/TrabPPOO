@@ -1,17 +1,17 @@
 # Configuração de simulação - arquivo de exemplo
 # Dimensões do grid
-GRID_WIDTH=60
-GRID_HEIGHT=40
+GRID_WIDTH=80
+GRID_HEIGHT=60
 
 # Número máximo de steps
 MAX_STEPS=1000
 
 # Definição de estações
 # Formato: SEASON=nome,duração,r,g,b,r,g,b (cores: empty, water)
-SEASON=spring,150,235,255,235,0,0,0
-SEASON=summer,120,250,250,230,160,200,240
-SEASON=autumn,100,245,235,215,170,205,240
-SEASON=winter,80,235,240,255,190,225,255
+SEASON=spring,150,141,182,0,42,157,244
+SEASON=summer,120,141,182,0,42,157,244
+SEASON=autumn,100,141,182,0,42,157,244
+SEASON=winter,80,58,86,3,208,239,255
 
 # Definição de lagos
 # Formato: LAKE=centerRow,centerCol,height,width

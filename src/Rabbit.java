@@ -23,10 +23,7 @@ public class Rabbit extends Animal
      */
     public Rabbit(boolean randomAge)
     {
-        super();
-        if(randomAge) {
-            // idade aleatória será definida durante a primeira ação usando o Random do contexto
-        }
+        super(randomAge);
     }
     
     /**
@@ -36,20 +33,20 @@ public class Rabbit extends Animal
     public void act(SimulationContext context, Field currentField, Field updatedField, List<Animal> newborns)
     {
         // Se criado com idade aleatória, inicializa na primeira ação
-        if(age == 0 && location == null) {
+        if(getAge() == 0 && getLocation() == null) {
             // nada a fazer aqui, a localização será definida pelo simulador ao criar
         }
-        incrementAge(MAX_AGE);
+        incrementAge();
         if(isAlive()) {
-            int births = breed(context, BREEDING_AGE, BREEDING_PROBABILITY, MAX_LITTER_SIZE);
+            int births = breed(context, BREEDING_PROBABILITY, MAX_LITTER_SIZE);
             for(int b = 0; b < births; b++) {
                 Rabbit newRabbit = new Rabbit(false);
                 newborns.add(newRabbit);
-                Location loc = updatedField.randomAdjacentLocation(location);
+                Location loc = updatedField.randomAdjacentLocation(getLocation());
                 newRabbit.setLocation(loc);
                 updatedField.place(newRabbit, loc);
             }
-            Location newLocation = updatedField.freeAdjacentLocation(location);
+            Location newLocation = updatedField.freeAdjacentLocation(getLocation());
             if(newLocation != null) {
                 setLocation(newLocation);
                 updatedField.place(this, newLocation);
@@ -58,6 +55,16 @@ public class Rabbit extends Animal
                 die();
             }
         }
+    }
+
+    @Override
+    protected int getMaxAge() {
+        return MAX_AGE;
+    }
+
+    @Override
+    protected int getBreedingAge() {
+        return BREEDING_AGE;
     }
     
     /**

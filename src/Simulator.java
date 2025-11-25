@@ -12,14 +12,9 @@ import java.awt.Color;
  * @author David J. Barnes and Michael Kolling
  * @version 2002-04-09
  */
-public class Simulator
-{
+public class Simulator{
     // The private static final variables represent 
     // configuration information for the simulation.
-    // The default width for the grid.
-    private static final int DEFAULT_WIDTH = 50;
-    // The default depth of the grid.
-    private static final int DEFAULT_DEPTH = 50;
     // The probability that a fox will be created in any given grid position.
     // Probabilidades passam a vir de SpeciesConfig
 
@@ -41,14 +36,17 @@ public class Simulator
     // Contexto de simulação (Random e SpeciesConfig)
     private final SimulationContext context;
     private final SpeciesConfig speciesConfig;
+    private static SimulationConfig simulationConfig = SimulationConfig.getInstance();;
     private SeasonCycle seasonCycle;
+        // configuração de múltiplos lagos
+    private List<int[]> lakes = new ArrayList<int[]>(); // each: {centerRow, centerCol, height, width}
     
     /**
      * Construct a simulation field with default size.
      */
     public Simulator()
     {
-        this(DEFAULT_DEPTH, DEFAULT_WIDTH, new Random(), defaultSpeciesConfig());
+        this(simulationConfig.getGridHeight(), simulationConfig.getGridWidth(), new Random(), defaultSpeciesConfig());
     }
     
     /**
@@ -61,14 +59,7 @@ public class Simulator
         this(depth, width, new Random(), defaultSpeciesConfig());
     }
 
-    public Simulator(int depth, int width, Random random, SpeciesConfig config)
-    {
-        if(width <= 0 || depth <= 0) {
-            System.out.println("The dimensions must be greater than zero.");
-            System.out.println("Using default values.");
-            depth = DEFAULT_DEPTH;
-            width = DEFAULT_WIDTH;
-        }
+    public Simulator(int depth, int width, Random random, SpeciesConfig config){
         animals = new ArrayList<Animal>();
         newAnimals = new ArrayList<Animal>();
         field = new Field(depth, width);
@@ -86,14 +77,6 @@ public class Simulator
         reset();
     }
     
-    /**
-     * Run the simulation from its current state for a reasonably long period,
-     * e.g. 500 steps.
-     */
-    public void runLongSimulation()
-    {
-        // Não iniciar automaticamente; use os botões Play/Pause.
-    }
     
     /**
      * Run the simulation from its current state for the given number of steps.
@@ -167,7 +150,7 @@ public class Simulator
         running = true;
         simThread = new Thread(new Runnable(){
             public void run() {
-                while(running && view.isViable(field)) {
+                while(running && view.isViable(field) && step<simulationConfig.getMaxSteps()) {
                     simulateOneStep();
                     try { 
                         int sleepTime = 10 + (speedLevel - 1) * 66; // 10ms + (level-1) * 66ms
@@ -265,26 +248,8 @@ public class Simulator
         }
     }
 
-    // configuração de múltiplos lagos
-    private java.util.List<int[]> lakes = new java.util.ArrayList<int[]>(); // each: {centerRow, centerCol, height, width}
 
- 
 
-    private void seedFishInLake() {
-        Random rand = context.getRandom();
-        for(int row = 0; row < field.getDepth(); row++) {
-            for(int col = 0; col < field.getWidth(); col++) {
-                if(field.isWater(row, col) && field.getObjectAt(row, col) == null) {
-                    if(rand.nextDouble() <= speciesConfig.getFishCreationProbability()) {
-                        Fish fish = new Fish(true);
-                        animals.add(fish);
-                        fish.setLocation(row, col);
-                        field.place(fish, row, col);
-                    }
-                }
-            }
-        }
-    }
     
     /**
      * Populate the field with foxes and rabbits.
@@ -323,9 +288,9 @@ public class Simulator
         SpeciesConfig config = new SpeciesConfig();
         config.setFoxCreationProbability(0.02);
         config.setRabbitCreationProbability(0.08);
-        config.setColor(Fox.class, Color.blue);
-        config.setColor(Rabbit.class, Color.orange);
-        config.setColor(Fish.class, new Color(230, 0, 0));
+        config.setColor(new Fox(false), new Color(255,153,51));
+        config.setColor(new Rabbit(false), Color.white);
+        config.setColor(new Fish(false), new Color(230, 0, 0));
         config.setFishCreationProbability(0.3);
         // multiplicadores sazonais defaults (ex.: primavera=1.2, inverno=0.7)
         config.setBreedingMultiplier("spring", 1.2);
@@ -338,10 +303,10 @@ public class Simulator
     }
 
     private static SeasonCycle defaultSeasonCycle() {
-        SeasonPhase spring = new SeasonPhase("spring", 100, new Color(235, 255, 235), new Color(170, 210, 245));
-        SeasonPhase summer = new SeasonPhase("summer", 100, new Color(250, 250, 230), new Color(160, 200, 240));
-        SeasonPhase autumn = new SeasonPhase("autumn", 100, new Color(245, 235, 215), new Color(170, 205, 240));
-        SeasonPhase winter = new SeasonPhase("winter", 100, new Color(235, 240, 255), new Color(190, 225, 255));
+        SeasonPhase spring = new SeasonPhase("spring", 100, new Color(141,182,0), new Color(42,157,244));
+        SeasonPhase summer = new SeasonPhase("summer", 100, new Color(141,182,0), new Color(42,157,244));
+        SeasonPhase autumn = new SeasonPhase("autumn", 100, new Color(141,182,0), new Color(42,157,244));
+        SeasonPhase winter = new SeasonPhase("winter", 100, new Color(58,86,3), new Color(208,239,255));
         return new SeasonCycle(new SeasonPhase[]{spring, summer, autumn, winter});
     }
 }

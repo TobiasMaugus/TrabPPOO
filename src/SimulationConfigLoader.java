@@ -1,7 +1,5 @@
 import java.io.*;
 import java.awt.Color;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Carregador de configuração de simulação a partir de arquivo .txt
@@ -9,10 +7,9 @@ import java.util.List;
 public class SimulationConfigLoader {
     
     public static SimulationConfig loadFromFile(String filePath) throws IOException {
-        SimulationConfig config = new SimulationConfig();
-        BufferedReader reader = new BufferedReader(new FileReader(filePath));
+        SimulationConfig config = SimulationConfig.getInstance();
         
-        try {
+        try(BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 line = line.trim();
@@ -65,8 +62,6 @@ public class SimulationConfigLoader {
                     }
                 }
             }
-        } finally {
-            reader.close();
         }
         
         return config;

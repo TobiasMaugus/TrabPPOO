@@ -1,4 +1,3 @@
-import java.awt.Color;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -13,7 +12,7 @@ import java.util.Iterator;
 public class FieldStats
 {
     // Counters for each type of entity (fox, rabbit, etc.) in the simulation.
-    private HashMap counters;
+    private HashMap<Animal, Counter> counters;
     // Whether the counters are currently up to date.
     private boolean countsValid;
 
@@ -24,7 +23,7 @@ public class FieldStats
     {
         // Set up a collection for counters for each type of animal that
         // we might find
-        counters = new HashMap();
+        counters = new HashMap<> ();
         countsValid = true;
     }
 
@@ -65,7 +64,7 @@ public class FieldStats
     /**
      * Increment the count for one class of animal.
      */
-    public void incrementCount(Class animalClass)
+    public void incrementCount(Animal animalClass)
     {
         Counter cnt = (Counter) counters.get(animalClass);
         if(cnt == null) {
@@ -76,9 +75,9 @@ public class FieldStats
         cnt.increment();
     }
 
-    private String getDisplayName(Class animalClass)
+    private String getDisplayName(Animal animalClass)
     {
-        String simple = animalClass.getSimpleName().toLowerCase();
+        String simple = animalClass.getClass().getSimpleName().toLowerCase();
         if("fox".equals(simple)) return "foxes";
         if("rabbit".equals(simple)) return "rabbits";
         if("fish".equals(simple)) return "fishes";
@@ -126,9 +125,9 @@ public class FieldStats
         reset();
         for(int row = 0; row < field.getDepth(); row++) {
             for(int col = 0; col < field.getWidth(); col++) {
-                Object animal = field.getObjectAt(row, col);
+                Animal animal = field.getObjectAt(row, col);
                 if(animal != null) {
-                    incrementCount(animal.getClass());
+                    incrementCount(animal);
                 }
             }
         }

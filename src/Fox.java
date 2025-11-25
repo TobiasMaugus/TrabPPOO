@@ -31,10 +31,9 @@ public class Fox extends Animal
      */
     public Fox(boolean randomAge)
     {
-        super();
-        if(randomAge) {
-            // idade e fome aleatórias serão determinadas usando Random do contexto quando necessário
-            foodLevel = RABBIT_FOOD_VALUE / 2; // inicialização segura
+        super(randomAge);
+        if(randomAge){
+            foodLevel = getRand().nextInt(RABBIT_FOOD_VALUE);
         }
         else {
             foodLevel = RABBIT_FOOD_VALUE;
@@ -48,20 +47,20 @@ public class Fox extends Animal
      */
     public void act(SimulationContext context, Field currentField, Field updatedField, List<Animal> newborns)
     {
-        incrementAge(MAX_AGE);
+        incrementAge();
         incrementHunger();
         if(isAlive()) {
-            int births = breed(context, BREEDING_AGE, BREEDING_PROBABILITY, MAX_LITTER_SIZE);
+            int births = breed(context, BREEDING_PROBABILITY, MAX_LITTER_SIZE);
             for(int b = 0; b < births; b++) {
                 Fox newFox = new Fox(false);
                 newborns.add(newFox);
-                Location loc = updatedField.randomAdjacentLocation(location);
+                Location loc = updatedField.randomAdjacentLocation(getLocation());
                 newFox.setLocation(loc);
                 updatedField.place(newFox, loc);
             }
-            Location newLocation = findFood(currentField, location);
+            Location newLocation = findFood(currentField, getLocation());
             if(newLocation == null) {
-                newLocation = updatedField.freeAdjacentLocation(location);
+                newLocation = updatedField.freeAdjacentLocation(getLocation());
             }
             if(newLocation != null) {
                 setLocation(newLocation);
@@ -77,15 +76,23 @@ public class Fox extends Animal
      * Increase the age. This could result in the fox's death.
      */
     // incrementAge herdado de Animal
+
+    @Override
+    protected int getMaxAge() {
+        return MAX_AGE;
+    }
+
+    @Override
+    protected int getBreedingAge() {
+        return BREEDING_AGE;
+    }
     
     /**
-     * Make this fox more hungry. This could result in the fox's death.
+     * Incrementa a fome da raposa. Isso pode levá-la a morte
      */
     private void incrementHunger()
     {
         int delta = 1;
-        SeasonPhase phase = null;
-        // tentativa de obter estação atual via SimulationContext não é possível aqui sem passá-lo; mantemos delta=1
         foodLevel -= delta;
         if(foodLevel <= 0) {
             die();
@@ -100,8 +107,8 @@ public class Fox extends Animal
      */
     private Location findFood(Field field, Location location)
     {
-        Iterator adjacentLocations =
-                          field.adjacentLocations(location);
+        Iterator adjacentLocations = field.adjacentLocations(location);
+
         while(adjacentLocations.hasNext()) {
             Location where = (Location) adjacentLocations.next();
             Object animal = field.getObjectAt(where);
@@ -132,7 +139,7 @@ public class Fox extends Animal
         // Uma evolução futura poderia passar o contexto como parâmetro
         return true;
     }
-        
+
     /**
      * Generate a number representing the number of births,
      * if it can breed.

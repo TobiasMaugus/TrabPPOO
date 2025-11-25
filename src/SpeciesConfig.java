@@ -12,7 +12,7 @@ public class SpeciesConfig {
     private double fishCreationProbability;
 
     // Mapa de cor por classe concreta
-    private Map<Class<?>, Color> colors;
+    private Map<Animal, Color> colors;
     // multiplicadores sazonais por espécie (nome simples lower -> fator)
     private Map<String, Double> breedingMultiplierBySeasonName;
     // multiplicadores sazonais por espécie específica: key = season:species
@@ -23,7 +23,7 @@ public class SpeciesConfig {
     private Map<String, Double> foodAvailabilityFactorBySeasonAndSpecies;
 
     public SpeciesConfig() {
-        colors = new HashMap<Class<?>, Color>();
+        colors = new HashMap<Animal, Color>();
         breedingMultiplierBySeasonName = new HashMap<String, Double>();
         breedingMultiplierBySeasonAndSpecies = new HashMap<String, Double>();
         predationSusceptibilityBySeasonAndSpecies = new HashMap<String, Double>();
@@ -54,11 +54,11 @@ public class SpeciesConfig {
         this.fishCreationProbability = fishCreationProbability;
     }
 
-    public void setColor(Class<?> animalClass, Color color) {
+    public void setColor(Animal animalClass, Color color) {
         colors.put(animalClass, color);
     }
 
-    public Color getColor(Class<?> animalClass) {
+    public Color getColor(Animal animalClass) {
         Color color = colors.get(animalClass);
         return color != null ? color : Color.gray;
     }

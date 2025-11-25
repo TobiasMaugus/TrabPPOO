@@ -6,12 +6,27 @@ import java.awt.Color;
  * Configuração de simulação carregada de arquivo .txt
  */
 public class SimulationConfig {
-    private int gridWidth = 50;
-    private int gridHeight = 50;
-    private int maxSteps = 500;
+    private static SimulationConfig instanciaUnica;
+
+    private int gridWidth;
+    private int gridHeight;
+    private int maxSteps;
     private List<SeasonConfig> seasons = new ArrayList<SeasonConfig>();
     private List<LakeConfig> lakes = new ArrayList<LakeConfig>();
     private List<SpeciesRateConfig> speciesRates = new ArrayList<SpeciesRateConfig>();
+
+    private SimulationConfig(){
+        gridHeight = 50;
+        gridWidth = 50;
+        maxSteps = 500;
+    }
+
+    public static SimulationConfig getInstance(){
+        if(instanciaUnica == null){
+            instanciaUnica = new SimulationConfig();
+        }
+        return instanciaUnica;
+    }
     
     public static class SeasonConfig {
         private String name;
@@ -24,6 +39,7 @@ public class SimulationConfig {
             this.durationSteps = durationSteps;
             this.emptyColor = emptyColor;
             this.waterColor = waterColor;
+            
         }
         
         public String getName() { return name; }
@@ -79,10 +95,10 @@ public class SimulationConfig {
     public List<SpeciesRateConfig> getSpeciesRates() { return speciesRates; }
     
     // Setters
-    public void setGridWidth(int width) { this.gridWidth = width; }
-    public void setGridHeight(int height) { this.gridHeight = height; }
-    public void setMaxSteps(int steps) { this.maxSteps = steps; }
-    public void addSeason(SeasonConfig season) { this.seasons.add(season); }
-    public void addLake(LakeConfig lake) { this.lakes.add(lake); }
-    public void addSpeciesRate(SpeciesRateConfig rate) { this.speciesRates.add(rate); }
+    public void setGridWidth(int width) { gridWidth = width; }
+    public void setGridHeight(int height) { gridHeight = height; }
+    public void setMaxSteps(int steps) { maxSteps = steps; }
+    public void addSeason(SeasonConfig season) { seasons.add(season); }
+    public void addLake(LakeConfig lake) { lakes.add(lake); }
+    public void addSpeciesRate(SpeciesRateConfig rate) { speciesRates.add(rate); }
 }

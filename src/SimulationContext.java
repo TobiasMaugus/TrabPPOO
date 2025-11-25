@@ -1,4 +1,3 @@
-import java.util.Map;
 import java.util.Random;
 
 /**
@@ -24,11 +23,11 @@ public class SimulationContext {
     }
 
     public void setSeasonCycle(SeasonCycle cycle) {
-        this.seasonCycle = cycle;
+        seasonCycle = cycle;
     }
 
     public void setCurrentStep(int step) {
-        this.currentStep = step;
+        currentStep = step;
     }
 
     public SeasonPhase getCurrentSeason() {

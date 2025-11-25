@@ -1,7 +1,12 @@
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
+
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * A graphical view of the simulation grid.
@@ -30,7 +35,7 @@ public class SimulatorView extends JFrame
     private JPanel legendPanel;
     
     // A map for storing colors for participants in the simulation
-    private HashMap colors;
+    private HashMap<Animal, Color> colors;
     // A statistics object computing and storing simulation information
     private FieldStats stats;
     private final SpeciesConfig speciesConfig;
@@ -40,18 +45,18 @@ public class SimulatorView extends JFrame
     /**
      * Create a view of the given width and height.
      */
-    public SimulatorView(int height, int width, SpeciesConfig speciesConfig, Simulator simulator)
-    {
+    public SimulatorView(int height, int width, SpeciesConfig speciesConfig, Simulator simulator){
         this.speciesConfig = speciesConfig;
         this.simulator = simulator;
         stats = new FieldStats();
-        colors = new HashMap();
+        colors = new HashMap<Animal, Color>();
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
 
-        setTitle("Predator/Prey Simulation");
+        setTitle("Simulação de predador/presa");
         stepLabel = new JLabel(STEP_PREFIX, JLabel.CENTER);
         seasonLabel = new JLabel(SEASON_PREFIX, JLabel.CENTER);
         population = new JLabel(POPULATION_PREFIX, JLabel.CENTER);
-        configFileLabel = new JLabel("Config: (default)", JLabel.CENTER);
+        configFileLabel = new JLabel("Configurator: (default)", JLabel.CENTER);
         speedLabel = new JLabel("Speed: 1 (10ms)", JLabel.CENTER);
         
         setLocation(100, 50);
@@ -164,7 +169,7 @@ public class SimulatorView extends JFrame
     /**
      * Define a color to be used for a given class of animal.
      */
-    public void setColor(Class animalClass, Color color)
+    public void setColor(Animal animalClass, Color color)
     {
         colors.put(animalClass, color);
     }
@@ -172,7 +177,7 @@ public class SimulatorView extends JFrame
     /**
      * Define a color to be used for a given class of animal.
      */
-    private Color getColor(Class animalClass)
+    private Color getColor(Animal animalClass)
     {
         Color cfg = speciesConfig.getColor(animalClass);
         if(cfg != Color.gray) return cfg;
@@ -199,16 +204,16 @@ public class SimulatorView extends JFrame
 
         stats.reset();
         fieldView.preparePaint();
-        java.util.Map<Class, Integer> counts = new java.util.HashMap<Class, Integer>();
+        Map<Animal, Integer> counts = new HashMap<Animal, Integer>();
             
         for(int row = 0; row < field.getDepth(); row++) {
             for(int col = 0; col < field.getWidth(); col++) {
-                Object animal = field.getObjectAt(row, col);
+                Animal animal = field.getObjectAt(row, col);
                 if(animal != null) {
-                    stats.incrementCount(animal.getClass());
-                    fieldView.drawMark(col, row, getColor(animal.getClass()));
-                    Integer c = counts.get(animal.getClass());
-                    counts.put(animal.getClass(), c == null ? 1 : c + 1);
+                    stats.incrementCount(animal);
+                    fieldView.drawMark(col, row, getColor(animal));
+                    Integer c = counts.get(animal);
+                    counts.put(animal, c == null ? 1 : c + 1);
                 }
                 else if(field.isWater(row, col)) {
                     fieldView.drawMark(col, row, getSeasonalWaterColor());
@@ -231,29 +236,27 @@ public class SimulatorView extends JFrame
         speedLabel.setText("Speed: " + level + " (" + ms + "ms)");
     }
     
-    private void updateLegend(java.util.Map<Class, Integer> counts) {
+    private void updateLegend(Map<Animal, Integer> counts) {
         legendPanel.removeAll();
         // Sempre mostra todas as espécies conhecidas, mesmo com contagem 0
-        java.util.Set<Class> allSpecies = new java.util.HashSet<Class>();
-        allSpecies.add(Fox.class);
-        allSpecies.add(Rabbit.class);
-        allSpecies.add(Fish.class);
+        Set<Animal> allSpecies = new HashSet<>();
+        allSpecies.add(new Fox(false));
+        allSpecies.add(new Rabbit(false));
+        allSpecies.add(new Fish(false));
         allSpecies.addAll(counts.keySet());
-        java.util.List<Class> keys = new java.util.ArrayList<Class>(allSpecies);
-        java.util.Collections.sort(keys, new java.util.Comparator<Class>(){
-            public int compare(Class a, Class b) { return a.getSimpleName().compareTo(b.getSimpleName()); }
-        });
-        for(Class cls : keys) {
-            int count = counts.containsKey(cls) ? counts.get(cls).intValue() : 0;
+        ArrayList<Animal> keys = new ArrayList<>(allSpecies);
+
+        for(Animal animal : keys) {
+            int count = counts.containsKey(animal) ? counts.get(animal).intValue() : 0;
             JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT));
             JPanel swatch = new JPanel();
-            swatch.setBackground(getColor(cls));
+            swatch.setBackground(getColor(animal));
             swatch.setPreferredSize(new Dimension(16,16));
             swatch.setMinimumSize(new Dimension(16,16));
             swatch.setMaximumSize(new Dimension(16,16));
             row.add(swatch);
             row.add(Box.createHorizontalStrut(8));
-            JLabel label = new JLabel(cls.getSimpleName() + " - " + count);
+            JLabel label = new JLabel(animal.getClass().getSimpleName() + " - " + count);
             row.add(label);
             legendPanel.add(row);
         }
