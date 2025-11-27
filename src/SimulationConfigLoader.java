@@ -6,7 +6,7 @@ import java.awt.Color;
  */
 public class SimulationConfigLoader {
     
-    public static SimulationConfig loadFromFile(String filePath) throws IOException {
+    public static SimulationConfig loadFromFile(String filePath, SpeciesConfigLoader speciesConfig) throws IOException {
         SimulationConfig config = SimulationConfig.getInstance();
         
         try(BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
@@ -58,7 +58,11 @@ public class SimulationConfigLoader {
                         double breedingRate = Double.parseDouble(parts[2]);
                         double predationSusceptibility = Double.parseDouble(parts[3]);
                         double foodAvailability = Double.parseDouble(parts[4]);
-                        config.addSpeciesRate(new SpeciesRateConfig(speciesName, seasonName, breedingRate, predationSusceptibility, foodAvailability));
+                        if (speciesConfig != null) {
+                            speciesConfig.setBreedingMultiplierFor(seasonName, speciesName, breedingRate);
+                            speciesConfig.setPredationSusceptibility(seasonName, speciesName, predationSusceptibility);
+                            speciesConfig.setFoodAvailabilityFactor(seasonName, speciesName, foodAvailability);
+                        }
                     }
                 }
             }

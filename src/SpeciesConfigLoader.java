@@ -45,11 +45,19 @@ public class SpeciesConfigLoader {
 
 
     private static String key(String seasonName, Animal species) {
-        return seasonName.toLowerCase() + ":" + species.getClass().getSimpleName().toLowerCase();
+        return key(seasonName, species.getClass().getSimpleName());
+    }
+
+    private static String key(String seasonName, String speciesName) {
+        return seasonName.toLowerCase() + ":" + speciesName.toLowerCase();
     }
 
     public void setBreedingMultiplierFor(String seasonName, Animal species, double multiplier) {
         breedingMultiplierBySeasonAndSpecies.put(key(seasonName, species), multiplier);
+    }
+
+    public void setBreedingMultiplierFor(String seasonName, String speciesName, double multiplier) {
+        breedingMultiplierBySeasonAndSpecies.put(key(seasonName, speciesName), multiplier);
     }
 
     public double getBreedingMultiplierFor(String seasonName, Animal species) {
@@ -62,6 +70,10 @@ public class SpeciesConfigLoader {
         predationSusceptibilityBySeasonAndSpecies.put(key(seasonName, preySpecies), probability);
     }
 
+    public void setPredationSusceptibility(String seasonName, String speciesName, double probability) {
+        predationSusceptibilityBySeasonAndSpecies.put(key(seasonName, speciesName), probability);
+    }
+
     public double getPredationSusceptibility(String seasonName, Animal preySpecies) {
         Double d = predationSusceptibilityBySeasonAndSpecies.get(key(seasonName, preySpecies));
         return d != null ? d.doubleValue() : 1.0;
@@ -69,6 +81,10 @@ public class SpeciesConfigLoader {
 
     public void setFoodAvailabilityFactor(String seasonName, Animal predatorSpecies, double factor) {
         foodAvailabilityFactorBySeasonAndSpecies.put(key(seasonName, predatorSpecies), factor);
+    }
+
+    public void setFoodAvailabilityFactor(String seasonName, String speciesName, double factor) {
+        foodAvailabilityFactorBySeasonAndSpecies.put(key(seasonName, speciesName), factor);
     }
 
     public double getFoodAvailabilityFactor(String seasonName, Animal predatorSpecies) {

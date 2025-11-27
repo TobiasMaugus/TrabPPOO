@@ -196,7 +196,7 @@ public class Simulator{
     }
     
     public void loadConfiguration(String configFilePath) throws Exception {
-        SimulationConfig config = SimulationConfigLoader.loadFromFile(configFilePath);
+        SimulationConfig config = SimulationConfigLoader.loadFromFile(configFilePath, speciesConfig);
         
         // Pausa simulação atual
         pauseSimulation();
@@ -217,16 +217,6 @@ public class Simulator{
             context.setSeasonCycle(seasonCycle);
         }
         
-        // Aplica taxas específicas de espécies por estação
-        for (SpeciesRateConfig rateConfig : config.getSpeciesRates()) {
-            Animal speciesClass = getSpeciesClass(rateConfig.getSpeciesName());
-            if (speciesClass != null) {
-                speciesConfig.setBreedingMultiplierFor(rateConfig.getSeasonName(), speciesClass, rateConfig.getBreedingRate());
-                speciesConfig.setPredationSusceptibility(rateConfig.getSeasonName(), speciesClass, rateConfig.getPredationSusceptibility());
-                speciesConfig.setFoodAvailabilityFactor(rateConfig.getSeasonName(), speciesClass, rateConfig.getFoodAvailability());
-            }
-        }
-        
         // Limpa lagos antigos e aplica novos do arquivo
         lakes.clear();
         for (LakeConfig lakeConfig : config.getLakes()) {
@@ -237,15 +227,6 @@ public class Simulator{
         
         // Reinicia
         reset();
-    }
-    
-    private Animal getSpeciesClass(String speciesName) {
-        switch (speciesName.toLowerCase()) {
-            case "fox": return new Fox(false);
-            case "rabbit": return new Rabbit(false);
-            case "fish": return new Fish(false);
-            default: return null;
-        }
     }
     
     /**
