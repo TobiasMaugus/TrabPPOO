@@ -38,14 +38,14 @@ public class SimulatorView extends JFrame
     private HashMap<Animal, Color> colors;
     // A statistics object computing and storing simulation information
     private FieldStats stats;
-    private final SpeciesConfig speciesConfig;
+    private final SpeciesConfigLoader speciesConfig;
     private final Simulator simulator;
     private SeasonPhase currentSeasonPhase;
 
     /**
      * Create a view of the given width and height.
      */
-    public SimulatorView(int height, int width, SpeciesConfig speciesConfig, Simulator simulator){
+    public SimulatorView(int height, int width, SpeciesConfigLoader speciesConfig, Simulator simulator){
         this.speciesConfig = speciesConfig;
         this.simulator = simulator;
         stats = new FieldStats();

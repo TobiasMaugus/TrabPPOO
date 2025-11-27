@@ -35,7 +35,7 @@ public class Simulator{
     private volatile int speedLevel = 1; // 1-15, onde sleep = 10 + (level-1) * 66ms
     // Contexto de simulação (Random e SpeciesConfig)
     private final SimulationContext context;
-    private final SpeciesConfig speciesConfig;
+    private final SpeciesConfigLoader speciesConfig;
     private static SimulationConfig simulationConfig = SimulationConfig.getInstance();;
     private SeasonCycle seasonCycle;
         // configuração de múltiplos lagos
@@ -59,7 +59,7 @@ public class Simulator{
         this(depth, width, new Random(), defaultSpeciesConfig());
     }
 
-    public Simulator(int depth, int width, Random random, SpeciesConfig config){
+    public Simulator(int depth, int width, Random random, SpeciesConfigLoader config){
         animals = new ArrayList<Animal>();
         newAnimals = new ArrayList<Animal>();
         field = new Field(depth, width);
@@ -210,7 +210,7 @@ public class Simulator{
         if (!config.getSeasons().isEmpty()) {
             SeasonPhase[] phases = new SeasonPhase[config.getSeasons().size()];
             for (int i = 0; i < config.getSeasons().size(); i++) {
-                SimulationConfig.SeasonConfig sc = config.getSeasons().get(i);
+                SeasonPhase sc = config.getSeasons().get(i);
                 phases[i] = new SeasonPhase(sc.getName(), sc.getDurationSteps(), sc.getEmptyColor(), sc.getWaterColor());
             }
             seasonCycle = new SeasonCycle(phases);
@@ -218,8 +218,8 @@ public class Simulator{
         }
         
         // Aplica taxas específicas de espécies por estação
-        for (SimulationConfig.SpeciesRateConfig rateConfig : config.getSpeciesRates()) {
-            Class<?> speciesClass = getSpeciesClass(rateConfig.getSpeciesName());
+        for (SpeciesRateConfig rateConfig : config.getSpeciesRates()) {
+            Animal speciesClass = getSpeciesClass(rateConfig.getSpeciesName());
             if (speciesClass != null) {
                 speciesConfig.setBreedingMultiplierFor(rateConfig.getSeasonName(), speciesClass, rateConfig.getBreedingRate());
                 speciesConfig.setPredationSusceptibility(rateConfig.getSeasonName(), speciesClass, rateConfig.getPredationSusceptibility());
@@ -229,7 +229,7 @@ public class Simulator{
         
         // Limpa lagos antigos e aplica novos do arquivo
         lakes.clear();
-        for (SimulationConfig.LakeConfig lakeConfig : config.getLakes()) {
+        for (LakeConfig lakeConfig : config.getLakes()) {
             lakes.add(new int[]{lakeConfig.getCenterRow(), lakeConfig.getCenterCol(), lakeConfig.getHeight(), lakeConfig.getWidth()});
             field.addLake(lakeConfig.getCenterRow(), lakeConfig.getCenterCol(), lakeConfig.getHeight(), lakeConfig.getWidth());
             updatedField.addLake(lakeConfig.getCenterRow(), lakeConfig.getCenterCol(), lakeConfig.getHeight(), lakeConfig.getWidth());
@@ -239,17 +239,14 @@ public class Simulator{
         reset();
     }
     
-    private Class<?> getSpeciesClass(String speciesName) {
+    private Animal getSpeciesClass(String speciesName) {
         switch (speciesName.toLowerCase()) {
-            case "fox": return Fox.class;
-            case "rabbit": return Rabbit.class;
-            case "fish": return Fish.class;
+            case "fox": return new Fox(false);
+            case "rabbit": return new Rabbit(false);
+            case "fish": return new Fish(false);
             default: return null;
         }
     }
-
-
-
     
     /**
      * Populate the field with foxes and rabbits.
@@ -260,23 +257,14 @@ public class Simulator{
         field.clear();
         for(int row = 0; row < field.getDepth(); row++) {
             for(int col = 0; col < field.getWidth(); col++) {
-                if(!field.isWater(row, col) && rand.nextDouble() <= speciesConfig.getFoxCreationProbability()) {
-                    Fox fox = new Fox(true);
-                    animals.add(fox);
-                    fox.setLocation(row, col);
-                    field.place(fox, row, col);
+                if(!field.isWater(row, col) && rand.nextDouble() <= Fox.getCreationProbability()) {
+                    placeAnimal(new Fox(true), row, col);
                 }
-                else if(!field.isWater(row, col) && rand.nextDouble() <= speciesConfig.getRabbitCreationProbability()) {
-                    Rabbit rabbit = new Rabbit(true);
-                    animals.add(rabbit);
-                    rabbit.setLocation(row, col);
-                    field.place(rabbit, row, col);
+                else if(!field.isWater(row, col) && rand.nextDouble() <= Rabbit.getCreationProbability()) {
+                    placeAnimal(new Rabbit(true), row, col);
                 }
-                else if(field.isWater(row, col) && rand.nextDouble() <= speciesConfig.getFishCreationProbability()) {
-                    Fish fish = new Fish(true);
-                    animals.add(fish);
-                    fish.setLocation(row, col);
-                    field.place(fish, row, col);
+                else if(field.isWater(row, col) && rand.nextDouble() <= Fish.getCreationProbability()) {
+                    placeAnimal(new Fish(true), row, col);
                 }
                 // else leave the location empty.
             }
@@ -284,21 +272,24 @@ public class Simulator{
         Collections.shuffle(animals);
     }
 
-    private static SpeciesConfig defaultSpeciesConfig() {
-        SpeciesConfig config = new SpeciesConfig();
-        config.setFoxCreationProbability(0.02);
-        config.setRabbitCreationProbability(0.08);
+    private void placeAnimal(Animal animal, int row, int col){
+        animals.add(animal);
+        animal.setLocation(row, col);
+        field.place(animal, row, col);
+    }
+
+    private static SpeciesConfigLoader defaultSpeciesConfig() {
+        SpeciesConfigLoader config = new SpeciesConfigLoader();
         config.setColor(new Fox(false), new Color(255,153,51));
         config.setColor(new Rabbit(false), Color.white);
         config.setColor(new Fish(false), new Color(230, 0, 0));
-        config.setFishCreationProbability(0.3);
         // multiplicadores sazonais defaults (ex.: primavera=1.2, inverno=0.7)
         config.setBreedingMultiplier("spring", 1.2);
         config.setBreedingMultiplier("summer", 1.0);
         config.setBreedingMultiplier("autumn", 0.9);
         config.setBreedingMultiplier("winter", 0.7);
         // Peixes não reproduzem no inverno
-        config.setBreedingMultiplierFor("winter", Fish.class, 0.0);
+        config.setBreedingMultiplierFor("winter", new Fish(false), 0.0);
         return config;
     }
 

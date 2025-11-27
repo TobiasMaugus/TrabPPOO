@@ -16,7 +16,9 @@ public class Fox extends Animal
     private static final int MAX_AGE = 150;
     private static final double BREEDING_PROBABILITY = 0.09;
     private static final int MAX_LITTER_SIZE = 3;
+    private static final double CREATION_PROBABILITY = 0.02;
     private static final int RABBIT_FOOD_VALUE = 4;
+    private static final int FISH_FOOD_VALUE = 2;
     
     // Individual characteristics (instance fields).
 
@@ -45,12 +47,13 @@ public class Fox extends Animal
      * rabbits. In the process, it might breed, die of hunger,
      * or die of old age.
      */
+    @Override
     public void act(SimulationContext context, Field currentField, Field updatedField, List<Animal> newborns)
     {
         incrementAge();
         incrementHunger();
         if(isAlive()) {
-            int births = breed(context, BREEDING_PROBABILITY, MAX_LITTER_SIZE);
+            int births = breed(context);
             for(int b = 0; b < births; b++) {
                 Fox newFox = new Fox(false);
                 newborns.add(newFox);
@@ -67,7 +70,7 @@ public class Fox extends Animal
                 updatedField.place(this, newLocation);
             }
             else {
-                die();
+                setDead();
             }
         }
     }
@@ -86,16 +89,30 @@ public class Fox extends Animal
     protected int getBreedingAge() {
         return BREEDING_AGE;
     }
+
+    @Override
+    protected double getBreedingProbability() {
+        return BREEDING_PROBABILITY;
+    }
+
+    @Override
+    protected int getMaxLitterSize() {
+        return MAX_LITTER_SIZE;
+    }
+
+    public static double getCreationProbability() {
+        return CREATION_PROBABILITY;
+    }
     
     /**
      * Incrementa a fome da raposa. Isso pode levá-la a morte
      */
     private void incrementHunger()
     {
-        int delta = 1;
-        foodLevel -= delta;
+        int dec = 1;
+        foodLevel -= dec;
         if(foodLevel <= 0) {
-            die();
+            setDead();
         }
     }
     
@@ -107,14 +124,14 @@ public class Fox extends Animal
      */
     private Location findFood(Field field, Location location)
     {
-        Iterator adjacentLocations = field.adjacentLocations(location);
+        Iterator<Location> adjacentLocations = field.adjacentLocations(location);
 
         while(adjacentLocations.hasNext()) {
-            Location where = (Location) adjacentLocations.next();
+            Location where = adjacentLocations.next();
             Object animal = field.getObjectAt(where);
             if(animal instanceof Rabbit) {
                 Rabbit rabbit = (Rabbit) animal;
-                if(rabbit.isAlive() && predationAllowed(field)) { 
+                if(rabbit.isAlive()) { 
                     rabbit.setEaten();
                     foodLevel = RABBIT_FOOD_VALUE;
                     return where;
@@ -123,9 +140,9 @@ public class Fox extends Animal
                 // Raposa na borda externa (terra) e peixe na borda interna (água)
                 if(!field.isWater(location) && field.isWater(where)) {
                     Fish fish = (Fish) animal;
-                    if(fish.isAlive() && predationAllowed(field)) {
-                        fish.die();
-                        foodLevel = RABBIT_FOOD_VALUE; // mesmo valor nutricional para simplificar
+                    if(fish.isAlive()) {
+                        fish.setDead();
+                        foodLevel = FISH_FOOD_VALUE;
                         return where;
                     }
                 }
@@ -133,41 +150,4 @@ public class Fox extends Animal
         }
         return null;
     }
-
-    private boolean predationAllowed(Field field) {
-        // Sem acesso direto ao contexto aqui; assume 100% por padrão
-        // Uma evolução futura poderia passar o contexto como parâmetro
-        return true;
-    }
-
-    /**
-     * Generate a number representing the number of births,
-     * if it can breed.
-     * @return The number of births (may be zero).
-     */
-    // breed herdado via Animal.breed(context,...)
-
-    /**
-     * A fox can breed if it has reached the breeding age.
-     */
-    // canBreed herdado via Animal
-    
-    /**
-     * Check whether the fox is alive or not.
-     * @return True if the fox is still alive.
-     */
-    // isAlive herdado
-
-    /**
-     * Set the animal's location.
-     * @param row The vertical coordinate of the location.
-     * @param col The horizontal coordinate of the location.
-     */
-    // setLocation herdado
-
-    /**
-     * Set the fox's location.
-     * @param location The fox's location.
-     */
-    // setLocation herdado
 }

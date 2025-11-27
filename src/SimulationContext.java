@@ -5,11 +5,11 @@ import java.util.Random;
  */
 public class SimulationContext {
     private final Random random;
-    private final SpeciesConfig speciesConfig;
+    private final SpeciesConfigLoader speciesConfig;
     private SeasonCycle seasonCycle;
     private int currentStep;
 
-    public SimulationContext(Random random, SpeciesConfig speciesConfig) {
+    public SimulationContext(Random random, SpeciesConfigLoader speciesConfig) {
         this.random = random;
         this.speciesConfig = speciesConfig;
     }
@@ -18,7 +18,7 @@ public class SimulationContext {
         return random;
     }
 
-    public SpeciesConfig getSpeciesConfig() {
+    public SpeciesConfigLoader getSpeciesConfig() {
         return speciesConfig;
     }
 

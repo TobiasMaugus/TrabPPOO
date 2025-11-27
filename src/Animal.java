@@ -16,7 +16,7 @@ public abstract class Animal {
     private boolean alive;
     private Location location;
 
-    protected Animal(boolean randomAge) {
+    public Animal(boolean randomAge) {
         age = 0;
         alive = true;
         if(randomAge) {
@@ -36,30 +36,32 @@ public abstract class Animal {
     protected void incrementAge() {
         age++;
         if(age > getMaxAge()) {
-            die();
+            setDead();
         }
     }
 
     /**
      * Reproduz de acordo com probabilidade e limites, usando a fonte de aleatoriedade do contexto.
      */
-    protected int breed(SimulationContext context, double probability, int maxLitterSize) {
+    protected int breed(SimulationContext context) {
         int births = 0;
-        double prob = probability;
+        double prob = getBreedingProbability();
         SeasonPhase phase = context.getCurrentSeason();
         if(phase != null) {
-            prob = probability * context.getSpeciesConfig().getBreedingMultiplierFor(phase.getName(), this.getClass());
+            prob = getBreedingProbability() * context.getSpeciesConfig().getBreedingMultiplierFor(phase.getName(), this);
         }
         if(canBreed() && context.getRandom().nextDouble() <= prob) {
-            births = context.getRandom().nextInt(maxLitterSize) + 1;
+            births = context.getRandom().nextInt(getMaxLitterSize()) + 1;
         }
         return births;
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null || getClass() != obj.getClass()) return false;
+        if (this == obj) 
+            return true;
+        if (obj == null || getClass() != obj.getClass()) 
+            return false;
         return true; // todos os animais da mesma classe são iguais
     }
 
@@ -79,7 +81,7 @@ public abstract class Animal {
         return alive;
     }
 
-    public static Random getRand() {
+    protected static Random getRand() {
         return rand;
     }
 
@@ -87,19 +89,19 @@ public abstract class Animal {
         return age;
     }
 
-     public Location getLocation() {
+    public Location getLocation() {
         return location;
     }
 
-    public void setLocation(int row, int col) {
+    protected void setLocation(int row, int col) {
         this.location = new Location(row, col);
     }
 
-    public void setLocation(Location location) {
+    protected void setLocation(Location location) {
         this.location = location;
     }
 
-    public void die() {
+    protected void setDead() {
         alive = false;
     }
 
@@ -114,6 +116,10 @@ public abstract class Animal {
      * esse método é implementado nas subclasses.
      */
     protected abstract int getMaxAge();
+
+    protected abstract double getBreedingProbability();
+
+    protected abstract int getMaxLitterSize();
 }
 
 

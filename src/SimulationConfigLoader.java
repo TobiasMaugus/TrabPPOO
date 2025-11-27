@@ -37,7 +37,7 @@ public class SimulationConfigLoader {
                             Integer.parseInt(parts[6]),
                             Integer.parseInt(parts[7])
                         );
-                        config.addSeason(new SimulationConfig.SeasonConfig(name, duration, emptyColor, waterColor));
+                        config.addSeason(new SeasonPhase(name, duration, emptyColor, waterColor));
                     }
                 } else if (line.startsWith("LAKE=")) {
                     // Formato: LAKE=centerRow,centerCol,height,width
@@ -47,7 +47,7 @@ public class SimulationConfigLoader {
                         int centerCol = Integer.parseInt(parts[1]);
                         int height = Integer.parseInt(parts[2]);
                         int width = Integer.parseInt(parts[3]);
-                        config.addLake(new SimulationConfig.LakeConfig(centerRow, centerCol, height, width));
+                        config.addLake(new LakeConfig(centerRow, centerCol, height, width));
                     }
                 } else if (line.startsWith("SPECIES_RATE=")) {
                     // Formato: SPECIES_RATE=speciesName,seasonName,breedingRate,predationSusceptibility,foodAvailability
@@ -58,7 +58,7 @@ public class SimulationConfigLoader {
                         double breedingRate = Double.parseDouble(parts[2]);
                         double predationSusceptibility = Double.parseDouble(parts[3]);
                         double foodAvailability = Double.parseDouble(parts[4]);
-                        config.addSpeciesRate(new SimulationConfig.SpeciesRateConfig(speciesName, seasonName, breedingRate, predationSusceptibility, foodAvailability));
+                        config.addSpeciesRate(new SpeciesRateConfig(speciesName, seasonName, breedingRate, predationSusceptibility, foodAvailability));
                     }
                 }
             }

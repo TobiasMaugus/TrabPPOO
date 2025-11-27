@@ -5,12 +5,7 @@ import java.util.Map;
 /**
  * Configuração de espécies (probabilidades de criação inicial, cores, etc.).
  */
-public class SpeciesConfig {
-    // Probabilidades de criação inicial
-    private double foxCreationProbability;
-    private double rabbitCreationProbability;
-    private double fishCreationProbability;
-
+public class SpeciesConfigLoader {
     // Mapa de cor por classe concreta
     private Map<Animal, Color> colors;
     // multiplicadores sazonais por espécie (nome simples lower -> fator)
@@ -22,7 +17,7 @@ public class SpeciesConfig {
     // disponibilidade de alimento para predadores (ex.: raposa) por estação (fator >= 0, >1 pior)
     private Map<String, Double> foodAvailabilityFactorBySeasonAndSpecies;
 
-    public SpeciesConfig() {
+    public SpeciesConfigLoader() {
         colors = new HashMap<Animal, Color>();
         breedingMultiplierBySeasonName = new HashMap<String, Double>();
         breedingMultiplierBySeasonAndSpecies = new HashMap<String, Double>();
@@ -30,76 +25,53 @@ public class SpeciesConfig {
         foodAvailabilityFactorBySeasonAndSpecies = new HashMap<String, Double>();
     }
 
-    public double getFoxCreationProbability() {
-        return foxCreationProbability;
-    }
-
-    public void setFoxCreationProbability(double foxCreationProbability) {
-        this.foxCreationProbability = foxCreationProbability;
-    }
-
-    public double getRabbitCreationProbability() {
-        return rabbitCreationProbability;
-    }
-
-    public void setRabbitCreationProbability(double rabbitCreationProbability) {
-        this.rabbitCreationProbability = rabbitCreationProbability;
-    }
-
-    public double getFishCreationProbability() {
-        return fishCreationProbability;
-    }
-
-    public void setFishCreationProbability(double fishCreationProbability) {
-        this.fishCreationProbability = fishCreationProbability;
+    public Color getColor(Animal animalClass) {
+        Color color = colors.get(animalClass);
+        return color != null ? color : Color.gray;
     }
 
     public void setColor(Animal animalClass, Color color) {
         colors.put(animalClass, color);
     }
 
-    public Color getColor(Animal animalClass) {
-        Color color = colors.get(animalClass);
-        return color != null ? color : Color.gray;
+    private double getBreedingMultiplier(String seasonName) {
+        Double d = breedingMultiplierBySeasonName.get(seasonName.toLowerCase());
+        return d != null ? d.doubleValue() : 1.0;
     }
 
     public void setBreedingMultiplier(String seasonName, double multiplier) {
         breedingMultiplierBySeasonName.put(seasonName.toLowerCase(), multiplier);
     }
 
-    public double getBreedingMultiplier(String seasonName) {
-        Double d = breedingMultiplierBySeasonName.get(seasonName.toLowerCase());
-        return d != null ? d.doubleValue() : 1.0;
+
+    private static String key(String seasonName, Animal species) {
+        return seasonName.toLowerCase() + ":" + species.getClass().getSimpleName().toLowerCase();
     }
 
-    private static String key(String seasonName, Class<?> species) {
-        return seasonName.toLowerCase() + ":" + species.getSimpleName().toLowerCase();
-    }
-
-    public void setBreedingMultiplierFor(String seasonName, Class<?> species, double multiplier) {
+    public void setBreedingMultiplierFor(String seasonName, Animal species, double multiplier) {
         breedingMultiplierBySeasonAndSpecies.put(key(seasonName, species), multiplier);
     }
 
-    public double getBreedingMultiplierFor(String seasonName, Class<?> species) {
+    public double getBreedingMultiplierFor(String seasonName, Animal species) {
         Double d = breedingMultiplierBySeasonAndSpecies.get(key(seasonName, species));
         if(d != null) return d.doubleValue();
         return getBreedingMultiplier(seasonName);
     }
 
-    public void setPredationSusceptibility(String seasonName, Class<?> preySpecies, double probability) {
+    public void setPredationSusceptibility(String seasonName, Animal preySpecies, double probability) {
         predationSusceptibilityBySeasonAndSpecies.put(key(seasonName, preySpecies), probability);
     }
 
-    public double getPredationSusceptibility(String seasonName, Class<?> preySpecies) {
+    public double getPredationSusceptibility(String seasonName, Animal preySpecies) {
         Double d = predationSusceptibilityBySeasonAndSpecies.get(key(seasonName, preySpecies));
         return d != null ? d.doubleValue() : 1.0;
     }
 
-    public void setFoodAvailabilityFactor(String seasonName, Class<?> predatorSpecies, double factor) {
+    public void setFoodAvailabilityFactor(String seasonName, Animal predatorSpecies, double factor) {
         foodAvailabilityFactorBySeasonAndSpecies.put(key(seasonName, predatorSpecies), factor);
     }
 
-    public double getFoodAvailabilityFactor(String seasonName, Class<?> predatorSpecies) {
+    public double getFoodAvailabilityFactor(String seasonName, Animal predatorSpecies) {
         Double d = foodAvailabilityFactorBySeasonAndSpecies.get(key(seasonName, predatorSpecies));
         return d != null ? d.doubleValue() : 1.0;
     }

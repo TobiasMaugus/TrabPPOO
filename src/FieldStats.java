@@ -36,9 +36,9 @@ public class FieldStats
         if(!countsValid) {
             generateCounts(field);
         }
-        Iterator keys = counters.keySet().iterator();
+        Iterator<Animal> keys = counters.keySet().iterator();
         while(keys.hasNext()) {
-            Counter info = (Counter) counters.get(keys.next());
+            Counter info = counters.get(keys.next());
             buffer.append(info.getName());
             buffer.append(": ");
             buffer.append(info.getCount());
@@ -54,10 +54,10 @@ public class FieldStats
     public void reset()
     {
         countsValid = false;
-        Iterator keys = counters.keySet().iterator();
+        Iterator<Animal> keys = counters.keySet().iterator();
         while(keys.hasNext()) {
-            Counter cnt = (Counter) counters.get(keys.next());
-            cnt.reset();
+            Counter counter = counters.get(keys.next());
+            counter.reset();
         }
     }
 
@@ -66,13 +66,13 @@ public class FieldStats
      */
     public void incrementCount(Animal animalClass)
     {
-        Counter cnt = (Counter) counters.get(animalClass);
-        if(cnt == null) {
+        Counter counter = (Counter) counters.get(animalClass);
+        if(counter == null) {
             // we do not have a counter for this species yet - create one
-            cnt = new Counter(getDisplayName(animalClass));
-            counters.put(animalClass, cnt);
+            counter = new Counter(getDisplayName(animalClass));
+            counters.put(animalClass, counter);
         }
-        cnt.increment();
+        counter.increment();
     }
 
     private String getDisplayName(Animal animalClass)
@@ -104,9 +104,9 @@ public class FieldStats
         if(!countsValid) {
             generateCounts(field);
         }
-        Iterator keys = counters.keySet().iterator();
+        Iterator<Animal> keys = counters.keySet().iterator();
         while(keys.hasNext()) {
-            Counter info = (Counter) counters.get(keys.next());
+            Counter info = counters.get(keys.next());
             if(info.getCount() > 0) {
                 nonZero++;
             }

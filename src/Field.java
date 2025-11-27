@@ -1,6 +1,6 @@
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.Random;
 
 /**
@@ -45,6 +45,18 @@ public class Field
             }
         }
     }
+
+    /**
+     * Place an animal at the given location.
+     * If there is already an animal at the location it will
+     * be lost.
+     * @param animal The animal to be placed.
+     * @param location Where to place the animal.
+     */
+    public void place(Animal animal, Location location)
+    {
+        place(animal, location.getRow(), location.getCol());
+    }
     
     /**
      * Place an animal at the given location.
@@ -56,19 +68,7 @@ public class Field
      */
     public void place(Animal animal, int row, int col)
     {
-        place(animal, new Location(row, col));
-    }
-    
-    /**
-     * Place an animal at the given location.
-     * If there is already an animal at the location it will
-     * be lost.
-     * @param animal The animal to be placed.
-     * @param location Where to place the animal.
-     */
-    public void place(Animal animal, Location location)
-    {
-        field[location.getRow()][location.getCol()] = animal;
+        field[row][col] = animal;
     }
     
     /**
@@ -96,7 +96,7 @@ public class Field
      * Define uma região retangular de lago centrada em (centerRow, centerCol)
      * com dimensões lakeHeight x lakeWidth. Valores fora dos limites são ignorados.
      */
-    public void setLake(int centerRow, int centerCol, int lakeHeight, int lakeWidth)
+    public void addLake(int centerRow, int centerCol, int lakeHeight, int lakeWidth)
     {
         if(lakeHeight <= 0 || lakeWidth <= 0) return;
         int halfH = lakeHeight / 2;
@@ -113,22 +113,14 @@ public class Field
         }
     }
 
-    /**
-     * Adiciona um lago adicional (sinônimo de setLake, mantendo múltiplas regiões).
-     */
-    public void addLake(int centerRow, int centerCol, int lakeHeight, int lakeWidth)
+    public boolean isWater(Location location)
     {
-        setLake(centerRow, centerCol, lakeHeight, lakeWidth);
+        return isWater(location.getRow(), location.getCol());
     }
 
     public boolean isWater(int row, int col)
     {
         return water[row][col];
-    }
-
-    public boolean isWater(Location location)
-    {
-        return isWater(location.getRow(), location.getCol());
     }
     
     /**
@@ -239,7 +231,7 @@ public class Field
     {
         int row = location.getRow();
         int col = location.getCol();
-        LinkedList<Location> locations = new LinkedList<Location>();
+        ArrayList<Location> locations = new ArrayList<Location>();
         for(int roffset = -1; roffset <= 1; roffset++) {
             int nextRow = row + roffset;
             if(nextRow >= 0 && nextRow < depth) {

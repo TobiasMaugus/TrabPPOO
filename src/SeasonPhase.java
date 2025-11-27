@@ -16,10 +16,21 @@ public class SeasonPhase {
         this.waterColor = waterColor;
     }
 
-    public String getName() { return name; }
-    public int getDurationSteps() { return durationSteps; }
-    public Color getEmptyColor() { return emptyColor; }
-    public Color getWaterColor() { return waterColor; }
+    public String getName() { 
+        return name; 
+    }
+    
+    public int getDurationSteps() {
+        return durationSteps; 
+    }
+
+    public Color getEmptyColor() { 
+        return emptyColor; 
+    }
+
+    public Color getWaterColor() { 
+        return waterColor; 
+    }
 }
 
 
