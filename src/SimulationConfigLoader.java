@@ -6,9 +6,11 @@ import java.awt.Color;
  */
 public class SimulationConfigLoader {
     
-    public static SimulationConfig loadFromFile(String filePath, SpeciesConfigLoader speciesConfig) throws IOException {
+    public static SimulationConfig loadFromFile(String filePath) throws IOException {
         SimulationConfig config = SimulationConfig.getInstance();
-        
+        SpeciesConfigLoader speciesConfig = SpeciesConfigLoader.getInstance();
+
+
         try(BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String line;
             while ((line = reader.readLine()) != null) {

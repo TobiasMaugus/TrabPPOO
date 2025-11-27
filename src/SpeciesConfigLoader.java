@@ -6,6 +6,8 @@ import java.util.Map;
  * Configuração de espécies (probabilidades de criação inicial, cores, etc.).
  */
 public class SpeciesConfigLoader {
+    private static SpeciesConfigLoader instanciaUnica;
+
     // Mapa de cor por classe concreta
     private Map<Animal, Color> colors;
     // multiplicadores sazonais por espécie (nome simples lower -> fator)
@@ -17,12 +19,19 @@ public class SpeciesConfigLoader {
     // disponibilidade de alimento para predadores (ex.: raposa) por estação (fator >= 0, >1 pior)
     private Map<String, Double> foodAvailabilityFactorBySeasonAndSpecies;
 
-    public SpeciesConfigLoader() {
+    private SpeciesConfigLoader() {
         colors = new HashMap<Animal, Color>();
         breedingMultiplierBySeasonName = new HashMap<String, Double>();
         breedingMultiplierBySeasonAndSpecies = new HashMap<String, Double>();
         predationSusceptibilityBySeasonAndSpecies = new HashMap<String, Double>();
         foodAvailabilityFactorBySeasonAndSpecies = new HashMap<String, Double>();
+    }
+
+    public static SpeciesConfigLoader getInstance(){
+        if(instanciaUnica == null){
+            instanciaUnica = new SpeciesConfigLoader();
+        }
+        return instanciaUnica;
     }
 
     public Color getColor(Animal animalClass) {

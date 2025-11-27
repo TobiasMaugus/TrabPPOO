@@ -8,7 +8,8 @@ public class SeasonCycle {
     public SeasonCycle(SeasonPhase[] phases) {
         this.phases = phases;
         int sum = 0;
-        for(SeasonPhase p : phases) sum += p.getDurationSteps();
+        for(SeasonPhase p : phases) 
+            sum += p.getDurationSteps();
         this.totalDuration = sum;
     }
 

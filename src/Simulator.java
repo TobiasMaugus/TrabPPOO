@@ -34,9 +34,9 @@ public class Simulator{
     private Thread simThread;
     private volatile int speedLevel = 1; // 1-15, onde sleep = 10 + (level-1) * 66ms
     // Contexto de simulação (Random e SpeciesConfig)
-    private final SimulationContext context;
-    private final SpeciesConfigLoader speciesConfig;
-    private static SimulationConfig simulationConfig = SimulationConfig.getInstance();;
+    private static SimulationContext context;
+    private static SpeciesConfigLoader speciesConfig = SpeciesConfigLoader.getInstance();
+    private static SimulationConfig simulationConfig = SimulationConfig.getInstance();
     private SeasonCycle seasonCycle;
         // configuração de múltiplos lagos
     private List<int[]> lakes = new ArrayList<int[]>(); // each: {centerRow, centerCol, height, width}
@@ -46,7 +46,7 @@ public class Simulator{
      */
     public Simulator()
     {
-        this(simulationConfig.getGridHeight(), simulationConfig.getGridWidth(), new Random(), defaultSpeciesConfig());
+        this(simulationConfig.getGridHeight(), simulationConfig.getGridWidth(), new Random());
     }
     
     /**
@@ -56,19 +56,19 @@ public class Simulator{
      */
     public Simulator(int depth, int width)
     {
-        this(depth, width, new Random(), defaultSpeciesConfig());
+        this(depth, width, new Random());
     }
 
-    public Simulator(int depth, int width, Random random, SpeciesConfigLoader config){
+    public Simulator(int depth, int width, Random random){
         animals = new ArrayList<Animal>();
         newAnimals = new ArrayList<Animal>();
         field = new Field(depth, width);
         updatedField = new Field(depth, width);
 
         // Create a view of the state of each location in the field.
-        speciesConfig = config;
-        context = new SimulationContext(random, speciesConfig);
-        view = new SimulatorView(depth, width, speciesConfig, this);
+        context = new SimulationContext(random);
+        defaultSpeciesConfig();
+        view = new SimulatorView(depth, width, this);
         // ciclo sazonal padrão
         seasonCycle = defaultSeasonCycle();
         context.setSeasonCycle(seasonCycle);
@@ -196,7 +196,7 @@ public class Simulator{
     }
     
     public void loadConfiguration(String configFilePath) throws Exception {
-        SimulationConfig config = SimulationConfigLoader.loadFromFile(configFilePath, speciesConfig);
+        SimulationConfig config = SimulationConfigLoader.loadFromFile(configFilePath);
         
         // Pausa simulação atual
         pauseSimulation();
@@ -259,19 +259,17 @@ public class Simulator{
         field.place(animal, row, col);
     }
 
-    private static SpeciesConfigLoader defaultSpeciesConfig() {
-        SpeciesConfigLoader config = new SpeciesConfigLoader();
-        config.setColor(new Fox(false), new Color(255,153,51));
-        config.setColor(new Rabbit(false), Color.white);
-        config.setColor(new Fish(false), new Color(230, 0, 0));
+    private static void defaultSpeciesConfig() {
+        speciesConfig.setColor(new Fox(false), new Color(255,153,51));
+        speciesConfig.setColor(new Rabbit(false), Color.white);
+        speciesConfig.setColor(new Fish(false), new Color(230, 0, 0));
         // multiplicadores sazonais defaults (ex.: primavera=1.2, inverno=0.7)
-        config.setBreedingMultiplier("spring", 1.2);
-        config.setBreedingMultiplier("summer", 1.0);
-        config.setBreedingMultiplier("autumn", 0.9);
-        config.setBreedingMultiplier("winter", 0.7);
+        speciesConfig.setBreedingMultiplier("spring", 1.2);
+        speciesConfig.setBreedingMultiplier("summer", 1.0);
+        speciesConfig.setBreedingMultiplier("autumn", 0.9);
+        speciesConfig.setBreedingMultiplier("winter", 0.7);
         // Peixes não reproduzem no inverno
-        config.setBreedingMultiplierFor("winter", new Fish(false), 0.0);
-        return config;
+        speciesConfig.setBreedingMultiplierFor("winter", new Fish(false), 0.0);
     }
 
     private static SeasonCycle defaultSeasonCycle() {

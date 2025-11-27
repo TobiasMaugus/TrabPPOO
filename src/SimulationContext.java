@@ -9,9 +9,9 @@ public class SimulationContext {
     private SeasonCycle seasonCycle;
     private int currentStep;
 
-    public SimulationContext(Random random, SpeciesConfigLoader speciesConfig) {
+    public SimulationContext(Random random) {
         this.random = random;
-        this.speciesConfig = speciesConfig;
+        this.speciesConfig = SpeciesConfigLoader.getInstance();
     }
 
     public Random getRandom() {
