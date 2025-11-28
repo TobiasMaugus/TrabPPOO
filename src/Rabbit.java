@@ -1,85 +1,108 @@
 import java.util.List;
 
 /**
- * A simple model of a rabbit.
- * Rabbits age, move, breed, and die.
- * 
- * @author David J. Barnes and Michael Kolling
- * @version 2002-04-11
+ * Modelo simples de um coelho.
+ * Coelhos envelhecem, se movem, procriam e morrem.
  */
-public class Rabbit extends Animal{
-    // Características compartilhadas pelos coelhos
+public class Rabbit extends Animal {
+    /** Idade mínima para reprodução. */
     private static final int BREEDING_AGE = 5;
+
+    /** Idade máxima antes de morrer naturalmente. */
     private static final int MAX_AGE = 50;
+
+    /** Probabilidade de se reproduzir a cada passo da simulação. */
     private static final double BREEDING_PROBABILITY = 0.15;
+
+    /** Número máximo de filhotes por reprodução. */
     private static final int MAX_LITTER_SIZE = 5;
+
+    /** Probabilidade de criação inicial de coelhos no campo. */
     private static final double CREATION_PROBABILITY = 0.08;
 
+
     /**
-     * Create a new rabbit. A rabbit may be created with age
-     * zero (a new born) or with a random age.
-     * 
-     * @param randomAge If true, the rabbit will have a random age.
+     * Construtor de um novo coelho.
+     * O coelho pode nascer com idade 0 (recém-nascido)
+     * ou receber uma idade aleatória caso randomAge = true.
+     *
+     * @param randomAge Se true, gera idade inicial aleatória.
      */
-    public Rabbit(boolean randomAge){
-        super(randomAge);
+    public Rabbit(boolean randomAge) {
+        super(randomAge); // delega inicialização à classe Animal
     }
-    
+
+
     /**
-     * This is what the rabbit does most of the time - it runs 
-     * around. Sometimes it will breed or die of old age.
+     * Ações realizadas por coelhos a cada ciclo da simulação.
+     * - Envelhece
+     * - Verifica se ainda está vivo
+     * - Pode se reproduzir
+     * - Tenta se mover para uma posição adjacente
+     * - Caso não haja para onde ir, morre por superlotação
      */
     @Override
-    public void act(SimulationContext context, Field currentField, Field updatedField, List<Animal> newborns){
+    public void act(SimulationContext context, Field currentField, Field updatedField, List<Animal> newborns) {
         incrementAge();
-        if(isAlive()){
+        
+        if (isAlive()) {
+            // Reprodução
             int births = breed(context);
-            for(int b = 0; b < births; b++){
-                Rabbit newRabbit = new Rabbit(false);
+            for (int b = 0; b < births; b++) {
+                Rabbit newRabbit = new Rabbit(false); // filhote nasce com idade 0
                 newborns.add(newRabbit);
+
+                // Localização aleatória adjacente onde o filhote será colocado
                 Location loc = updatedField.randomAdjacentLocation(getLocation());
+
                 newRabbit.setLocation(loc);
                 updatedField.place(newRabbit, loc);
             }
+
+            // Tenta encontrar espaço livre adjacente
             Location newLocation = updatedField.freeAdjacentLocation(getLocation());
-            if(newLocation != null){
+            
+            if (newLocation != null) {
                 setLocation(newLocation);
                 updatedField.place(this, newLocation);
             }
-            else{
+            else {
+                // Sem espaço = morre por superlotação
                 setDead();
             }
         }
     }
 
     @Override
-    protected int getMaxAge(){
+    protected int getMaxAge() {
         return MAX_AGE;
     }
 
     @Override
-    protected int getBreedingAge(){
+    protected int getBreedingAge() {
         return BREEDING_AGE;
     }
 
     @Override
-    protected double getBreedingProbability(){
+    protected double getBreedingProbability() {
         return BREEDING_PROBABILITY;
     }
 
     @Override
-    protected int getMaxLitterSize(){
+    protected int getMaxLitterSize() {
         return MAX_LITTER_SIZE;
     }
-    
-    public static double getCreationProbability(){
+
+    /** Probabilidade usada somente na criação inicial do campo. */
+    public static double getCreationProbability() {
         return CREATION_PROBABILITY;
     }
 
+
     /**
-     * Tell the rabbit that it's dead now :(
+     * Marca o coelho como morto por ter sido comido por um predador.
      */
-    public void setEaten(){
+    public void setEaten() {
         setDead();
     }
 }

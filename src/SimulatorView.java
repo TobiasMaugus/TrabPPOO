@@ -9,21 +9,22 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * A graphical view of the simulation grid.
- * The view displays a colored rectangle for each location 
- * representing its contents. It uses a default background color.
- * Colors for each type of species can be defined using the
- * setColor method.
+ * Janela gráfica responsável por exibir o estado atual da simulação.
  * 
- * @author David J. Barnes and Michael Kolling
- * @version 2002-04-23
+ * A classe desenha o campo (grid) da simulação, mostrando cada posição com
+ * uma cor correspondente ao tipo de elemento presente (animal, água ou espaço vazio).
+ * Também exibe informações como passo atual, estação do ano, arquivo de configuração
+ * carregado e velocidade da simulação.
+ * 
+ * Possui ainda controles para iniciar, pausar, redefinir a simulação,
+ * alterar a velocidade e carregar arquivos de configuração.
  */
 public class SimulatorView extends JFrame{
-    // Colors used for empty locations.
+    // Cores usadas para locais vazios.
     private static final Color DEFAULT_EMPTY_COLOR = Color.white;
     private static final Color DEFAULT_WATER_COLOR = new Color(180, 220, 255);
 
-    // Color used for objects that have no defined color.
+    // Cor usada para objetos sem cor definida.
     private static final Color UNKNOWN_COLOR = Color.gray;
 
     private final String STEP_PREFIX = "Step: ";
@@ -33,16 +34,26 @@ public class SimulatorView extends JFrame{
     private FieldView fieldView;
     private JPanel legendPanel;
     
-    // A map for storing colors for participants in the simulation
+    // Mapa que armazena cores das espécies.
     private HashMap<Animal, Color> colors;
-    // A statistics object computing and storing simulation information
+
+    // Estatísticas do campo.
     private FieldStats stats;
+
+    // Carregador de configurações de espécies.
     private final SpeciesConfigLoader speciesConfig = SpeciesConfigLoader.getInstance();
+
+    // Referência ao simulador principal.
     private final Simulator simulator;
+
     private SeasonPhase currentSeasonPhase;
 
     /**
-     * Create a view of the given width and height.
+     * Constrói a janela da simulação com um campo do tamanho especificado.
+     *
+     * @param height Altura do campo.
+     * @param width Largura do campo.
+     * @param simulator Instância do simulador que controla a execução.
      */
     public SimulatorView(int height, int width, Simulator simulator){
         this.simulator = simulator;
@@ -114,7 +125,7 @@ public class SimulatorView extends JFrame{
             }
         });
         
-        // ActionListeners para botões de velocidade
+        // Aumenta a velocidade
         speedUp1.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent e){
                 simulator.increaseSpeed();
@@ -129,6 +140,7 @@ public class SimulatorView extends JFrame{
             }
         });
 
+        // Diminui a velocidade
         speedDown1.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent e){
                 simulator.decreaseSpeed();
@@ -161,12 +173,12 @@ public class SimulatorView extends JFrame{
         contents.add(topPanel, BorderLayout.NORTH);
         contents.add(fieldView, BorderLayout.CENTER);
 
-        // Legenda na lateral direita
+        // Painel da legenda (espécies e cores)
         legendPanel = new JPanel();
         legendPanel.setLayout(new BoxLayout(legendPanel, BoxLayout.Y_AXIS));
         contents.add(new JScrollPane(legendPanel), BorderLayout.EAST);
 
-        // Oculta a linha de população textual na base
+        // Linha de população (não exibida)
         contents.add(population, BorderLayout.SOUTH);
         population.setVisible(false);
         pack();
@@ -174,14 +186,22 @@ public class SimulatorView extends JFrame{
     }
     
     /**
-     * Define a color to be used for a given class of animal.
+     * Define a cor a ser utilizada para uma determinada espécie.
+     *
+     * @param animalClass Classe da espécie.
+     * @param color Cor associada.
      */
     public void setColor(Animal animalClass, Color color){
         colors.put(animalClass, color);
     }
 
     /**
-     * Define a color to be used for a given class of animal.
+     * Retorna a cor configurada para a espécie informada.
+     * Se não houver configuração, tenta usar a cor padrão do arquivo de configuração.
+     * Caso contrário, retorna uma cor cinza para indicar desconhecido.
+     *
+     * @param animalClass Classe da espécie.
+     * @return Cor associada à espécie ou cinza se desconhecida.
      */
     private Color getColor(Animal animalClass){
         Color cfg = speciesConfig.getColor(animalClass);
@@ -193,9 +213,11 @@ public class SimulatorView extends JFrame{
     }
 
     /**
-     * Show the current status of the field.
-     * @param step Which iteration step it is.
-     * @param stats Status of the field to be represented.
+     * Exibe o estado atual da simulação no grid.
+     *
+     * @param step Passo atual da simulação.
+     * @param stats Estatísticas do campo.
+     * @param seasonName Nome da estação atual.
      */
     public void showStatus(int step, Field field, String seasonName){
         if(!isVisible())
@@ -237,15 +259,25 @@ public class SimulatorView extends JFrame{
         fieldView.repaint();
     }
 
+    /**
+     * Atualiza o texto que exibe o nível de velocidade atual.
+     */
     private void updateSpeedLabel(){
         int level = simulator.getSpeedLevel();
         int ms = 10 + (level - 1) * 66;
         speedLabel.setText("Speed: " + level + " (" + ms + "ms)");
     }
     
+    /**
+     * Atualiza a legenda lateral exibindo todas as espécies
+     * conhecidas e suas contagens atuais no campo.
+     *
+     * @param counts Mapa contendo as quantidades de cada espécie presente.
+     */
     private void updateLegend(Map<Animal, Integer> counts){
         legendPanel.removeAll();
-        // Sempre mostra todas as espécies conhecidas, mesmo com contagem 0
+
+        // Conjunto de todas as espécies a serem exibidas
         Set<Animal> allSpecies = new HashSet<>();
         allSpecies.add(new Fox(false));
         allSpecies.add(new Rabbit(false));
@@ -255,6 +287,7 @@ public class SimulatorView extends JFrame{
 
         for(Animal animal : keys){
             int count = counts.containsKey(animal) ? counts.get(animal).intValue() : 0;
+
             JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT));
             JPanel swatch = new JPanel();
             swatch.setBackground(getColor(animal));
@@ -262,25 +295,42 @@ public class SimulatorView extends JFrame{
             swatch.setMinimumSize(new Dimension(16,16));
             swatch.setMaximumSize(new Dimension(16,16));
             row.add(swatch);
+
             row.add(Box.createHorizontalStrut(8));
             JLabel label = new JLabel(animal.getClass().getSimpleName() + " - " + count);
             row.add(label);
             legendPanel.add(row);
         }
+
         legendPanel.revalidate();
         legendPanel.repaint();
     }
 
+    /**
+     * Define a estação atual da simulação.
+     *
+     * @param phase Fase da estação ativa no momento.
+     */
     public void setSeasonPhase(SeasonPhase phase){
         this.currentSeasonPhase = phase;
     }
 
+    /**
+     * Retorna a cor usada para células vazias conforme a estação atual.
+     *
+     * @return Cor da célula vazia para a estação ou cor padrão.
+     */
     private Color getSeasonalEmptyColor(){
         if(currentSeasonPhase != null) 
             return currentSeasonPhase.getEmptyColor();
         return DEFAULT_EMPTY_COLOR;
     }
 
+    /**
+     * Retorna a cor usada para células de água conforme a estação atual.
+     *
+     * @return Cor da água para a estação ou cor padrão.
+     */
     private Color getSeasonalWaterColor(){
         if(currentSeasonPhase != null) 
             return currentSeasonPhase.getWaterColor();
@@ -288,20 +338,19 @@ public class SimulatorView extends JFrame{
     }
 
     /**
-     * Determine whether the simulation should continue to run.
-     * @return true If there is more than one species alive.
+     * Verifica se a simulação ainda é viável, ou seja,
+     * se mais de uma espécie continua viva.
+     *
+     * @param field O campo sendo avaliado.
+     * @return true se ainda houver diversidade biológica.
      */
     public boolean isViable(Field field){
         return stats.isViable(field);
     }
-    
+
     /**
-     * Provide a graphical view of a rectangular field. This is 
-     * a nested class (a class defined inside a class) which
-     * defines a custom component for the user interface. This
-     * component displays the field.
-     * This is rather advanced GUI stuff - you can ignore this 
-     * for your project if you like.
+     * Componente gráfico interno responsável por desenhar o campo
+     * da simulação em forma de grade colorida.
      */
     private class FieldView extends JPanel{
         private final int GRID_VIEW_SCALING_FACTOR = 10;
@@ -313,7 +362,10 @@ public class SimulatorView extends JFrame{
         private Image fieldImage;
 
         /**
-         * Create a new FieldView component.
+         * Constrói o componente responsável por exibir o campo.
+         *
+         * @param height Altura (número de linhas) do grid.
+         * @param width  Largura (número de colunas) do grid.
          */
         public FieldView(int height, int width){
             gridHeight = height;
@@ -322,20 +374,25 @@ public class SimulatorView extends JFrame{
         }
 
         /**
-         * Tell the GUI manager how big we would like to be.
+         * Informa ao gerenciador de layout o tamanho desejado para o painel.
+         *
+         * @return Dimensão recomendada baseada no fator de escala da grade.
          */
         public Dimension getPreferredSize(){
-            return new Dimension(gridWidth * GRID_VIEW_SCALING_FACTOR, gridHeight * GRID_VIEW_SCALING_FACTOR);
+            return new Dimension(
+                gridWidth * GRID_VIEW_SCALING_FACTOR,
+                gridHeight * GRID_VIEW_SCALING_FACTOR
+            );
         }
         
         /**
-         * Prepare for a new round of painting. Since the component
-         * may be resized, compute the scaling factor again.
+         * Prepara a área de pintura, recriando a imagem caso o painel
+         * tenha sido redimensionado.
          */
         public void preparePaint(){
-            if(! size.equals(getSize())){  // if the size has changed...
+            if(! size.equals(getSize())){
                 size = getSize();
-                fieldImage = fieldView.createImage(size.width, size.height);
+                fieldImage = createImage(size.width, size.height);
                 g = fieldImage.getGraphics();
 
                 xScale = size.width / gridWidth;
@@ -350,7 +407,12 @@ public class SimulatorView extends JFrame{
         }
         
         /**
-         * Paint on grid location on this field in a given color.
+         * Desenha um retângulo representando o conteúdo de uma célula
+         * da simulação na cor especificada.
+         *
+         * @param x     Coluna da célula.
+         * @param y     Linha da célula.
+         * @param color Cor a ser aplicada na célula.
          */
         public void drawMark(int x, int y, Color color){
             g.setColor(color);
@@ -358,8 +420,10 @@ public class SimulatorView extends JFrame{
         }
 
         /**
-         * The field view component needs to be redisplayed. Copy the
-         * internal image to screen.
+         * Re-renderiza visualmente o painel desenhando a imagem interna
+         * previamente montada no buffer.
+         *
+         * @param g Contexto gráfico do Swing.
          */
         public void paintComponent(Graphics g){
             if(fieldImage != null){

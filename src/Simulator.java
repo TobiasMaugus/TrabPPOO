@@ -6,85 +6,85 @@ import java.util.Collections;
 import java.awt.Color;
 
 /**
- * A simple predator-prey simulator, based on a field containing
- * rabbits and foxes.
+ * Um simulador simples de predador–presa, baseado em um campo contendo
+ * coelhos, raposas e peixes, com suporte a configuração externa e ciclos sazonais.
  * 
- * @author David J. Barnes and Michael Kolling
- * @version 2002-04-09
+ * Controla o estado da simulação, a progressão dos passos, as listas de animais,
+ * e a interação com a interface gráfica.
+ * 
+ * @author João Gabriel Salomão Baldim
+ * @author Luis Kennedy Gervásio Turola
+ * @author Thaís Giovanna Lopes
+ * @author Tobias Maugus Bueno Cougo
+ * 
+ * Adaptado de: David J. Barnes e Michael Kolling (2002).
  */
 public class Simulator{
-    // The private static final variables represent 
-    // configuration information for the simulation.
-    // The probability that a fox will be created in any given grid position.
-    // Probabilidades passam a vir de SpeciesConfig
-
-    // The list of animals in the field
+    // Lista de todos os animais vivos no campo.
     private List<Animal> animals;
-    // The list of animals just born
+    // Lista de animais nascidos durante o passo atual.
     private List<Animal> newAnimals;
-    // The current state of the field.
+    // Campo atual da simulação.
     private Field field;
-    // A second field, used to build the next stage of the simulation.
+    // Segundo campo usado para calcular o próximo estado.
     private Field updatedField;
-    // The current step of the simulation.
+    // Contador de passos da simulação.
     private int step;
-    // A graphical view of the simulation.
+    // Interface gráfica da simulação.
     private SimulatorView view;
+    // Estado da execução (rodando / pausado).
     private volatile boolean running = false;
     private Thread simThread;
-    private volatile int speedLevel = 1; // 1-15, onde sleep = 10 + (level-1) * 66ms
-    // Contexto de simulação (Random e SpeciesConfig)
+    // Velocidade da simulação (1–15).
+    private volatile int speedLevel = 1;
+
+    // Contexto da simulação com Random e configurações.
     private static SimulationContext context;
     private static SpeciesConfigLoader speciesConfig = SpeciesConfigLoader.getInstance();
     private static SimulationConfig simulationConfig = SimulationConfig.getInstance();
-    private SeasonCycle seasonCycle;
-        // configuração de múltiplos lagos
-    private List<int[]> lakes = new ArrayList<int[]>(); // each: {centerRow, centerCol, height, width}
 
+    // Ciclo sazonal atual.
+    private SeasonCycle seasonCycle;
+    
+    // Configuração de múltiplos lagos (cada item: {linha, coluna, altura, largura})
+    private List<int[]> lakes = new ArrayList<int[]>();
+
+    /**
+     * Construtor do simulador.
+     * Inicializa campo, lista de animais, ciclo sazonal padrão, configurações
+     * e prepara a interface gráfica.
+     */
     public Simulator(){
         int depth = simulationConfig.getGridHeight();
         int width = simulationConfig.getGridWidth();
-        Random random = new Random();
 
         animals = new ArrayList<Animal>();
         newAnimals = new ArrayList<Animal>();
         field = new Field(depth, width);
         updatedField = new Field(depth, width);
 
-        // Create a view of the state of each location in the field.
-        context = new SimulationContext(random);
+        context = new SimulationContext();
         defaultSpeciesConfig();
         view = new SimulatorView(depth, width, this);
-        // ciclo sazonal padrão
+
         seasonCycle = defaultSeasonCycle();
         context.setSeasonCycle(seasonCycle);
         
-        // Setup a valid starting point.
         reset();
     }
     
-    /**
-     * Run the simulation from its current state for the given number of steps.
-     * Stop before the given number of steps if it ceases to be viable.
-     
-    public void simulate(int numSteps){
-        // Mantido para compatibilidade, mas controle preferido é Play/Pause.
-        for(int step = 1; step <= numSteps && view.isViable(field); step++) 
-            simulateOneStep();
-    }
-    */
     
     /**
-     * Run the simulation from its current state for a single step.
-     * Iterate over the whole field updating the state of each
-     * fox and rabbit.
+     * Executa um único passo da simulação.
+     * Atualiza o passo global, permite que cada animal aja
+     * e atualiza o campo para a próxima geração.
      */
     public void simulateOneStep(){
         step++;
         context.setCurrentStep(step);
         newAnimals.clear();
         
-        // let all animals act
+        // Executa as ações de cada animal
         for(Iterator<Animal> iter = animals.iterator(); iter.hasNext(); ) {
             Animal animal = iter.next();
             if(animal.isAlive()) {
@@ -93,23 +93,24 @@ public class Simulator{
                 iter.remove();
             }
         }
-        // add new born animals to the list of animals
+
         animals.addAll(newAnimals);
-        
-        // Swap the field and updatedField at the end of the step.
+
+        // Troca o campo pelo atualizado
         Field temp = field;
         field = updatedField;
         updatedField = temp;
         updatedField.clear();
 
-        // display the new field on screen
+        // Atualiza exibição gráfica
         SeasonPhase phase = context.getCurrentSeason();
         view.setSeasonPhase(phase);
         view.showStatus(step, field, phase != null ? phase.getName() : null);
     }
         
     /**
-     * Reset the simulation to a starting position.
+     * Reinicia a simulação para o estado inicial.
+     * Limpa animais, campo e reaplica lagos e população inicial.
      */
     public void reset()
     {
@@ -117,19 +118,23 @@ public class Simulator{
         animals.clear();
         field.clear();
         updatedField.clear();
-        // aplica lagos configurados
+
         for(int[] lake : lakes) {
             field.addLake(lake[0], lake[1], lake[2], lake[3]);
             updatedField.addLake(lake[0], lake[1], lake[2], lake[3]);
         }
+
         populate(field);
-        
-        // Show the starting state in the view.
+
         SeasonPhase phase2 = context.getCurrentSeason();
         view.setSeasonPhase(phase2);
         view.showStatus(step, field, phase2 != null ? phase2.getName() : null);
     }
 
+    /**
+     * Inicia a execução contínua da simulação em uma thread separada,
+     * respeitando a velocidade configurada.
+     */
     public synchronized void startSimulation() {
         if(running) return;
         running = true;
@@ -138,7 +143,7 @@ public class Simulator{
                 while(running && view.isViable(field) && step<simulationConfig.getMaxSteps()) {
                     simulateOneStep();
                     try { 
-                        int sleepTime = 10 + (speedLevel - 1) * 66; // 10ms + (level-1) * 66ms
+                        int sleepTime = 10 + (speedLevel - 1) * 66;
                         Thread.sleep(sleepTime); 
                     } catch (InterruptedException e) { 
                         Thread.currentThread().interrupt(); 
@@ -152,48 +157,73 @@ public class Simulator{
         simThread.start();
     }
 
+    /**
+     * Pausa a simulação.
+     */
     public synchronized void pauseSimulation() {
         running = false;
     }
 
+    /**
+     * @return true se a simulação está em execução.
+     */
     public synchronized boolean isRunning() {
         return running;
     }
     
+    /**
+     * Aumenta a velocidade da simulação em 1 nível.
+     */
     public synchronized void increaseSpeed() {
         if (speedLevel < 15) 
             speedLevel++;
     }
-    
+
+    /**
+     * Aumenta a velocidade da simulação em 5 níveis.
+     */
     public synchronized void increaseSpeedBy5() {
         speedLevel = Math.min(15, speedLevel + 5);
     }
     
+    /**
+     * Reduz a velocidade da simulação em 1 nível.
+     */
     public synchronized void decreaseSpeed() {
         if (speedLevel > 1) 
             speedLevel--;
     }
     
+    /**
+     * Reduz a velocidade da simulação em 5 níveis.
+     */
     public synchronized void decreaseSpeedBy5() {
         speedLevel = Math.max(1, speedLevel - 5);
     }
     
+    /**
+     * @return o nível atual de velocidade da simulação.
+     */
     public synchronized int getSpeedLevel() {
         return speedLevel;
     }
     
+    /**
+     * Carrega configurações completas de um arquivo externo,
+     * incluindo dimensões, estações, lagos e parâmetros.
+     * 
+     * @param configFilePath Caminho do arquivo JSON/YAML de configuração.
+     * @throws Exception caso o arquivo seja inválido.
+     */
     public void loadConfiguration(String configFilePath) throws Exception {
         SimulationConfig config = SimulationConfigLoader.loadFromFile(configFilePath);
         
-        // Pausa simulação atual
         pauseSimulation();
-        
-        // Recria o simulador com novas dimensões
+
         animals.clear();
         field = new Field(config.getGridHeight(), config.getGridWidth());
         updatedField = new Field(config.getGridHeight(), config.getGridWidth());
         
-        // Recria ciclo sazonal se configurado
         if (!config.getSeasons().isEmpty()) {
             SeasonPhase[] phases = new SeasonPhase[config.getSeasons().size()];
             for (int i = 0; i < config.getSeasons().size(); i++) {
@@ -204,7 +234,6 @@ public class Simulator{
             context.setSeasonCycle(seasonCycle);
         }
         
-        // Limpa lagos antigos e aplica novos do arquivo
         lakes.clear();
         for (LakeConfig lakeConfig : config.getLakes()) {
             lakes.add(new int[]{lakeConfig.getCenterRow(), lakeConfig.getCenterCol(), lakeConfig.getHeight(), lakeConfig.getWidth()});
@@ -212,12 +241,12 @@ public class Simulator{
             updatedField.addLake(lakeConfig.getCenterRow(), lakeConfig.getCenterCol(), lakeConfig.getHeight(), lakeConfig.getWidth());
         }
         
-        // Reinicia
         reset();
     }
     
     /**
-     * Populate the field with foxes and rabbits.
+     * Popula o campo inicial com raposas, coelhos e peixes,
+     * seguindo as probabilidades definidas nas configurações.
      */
     private void populate(Field field)
     {
@@ -234,31 +263,40 @@ public class Simulator{
                 else if(field.isWater(row, col) && rand.nextDouble() <= Fish.getCreationProbability()) {
                     placeAnimal(new Fish(true), row, col);
                 }
-                // else leave the location empty.
             }
         }
         Collections.shuffle(animals);
     }
 
+    /**
+     * Posiciona um animal em uma célula específica do campo.
+     *
+     * @param animal Animal a ser inserido
+     * @param row Linha da posição
+     * @param col Coluna da posição
+     */
     private void placeAnimal(Animal animal, int row, int col){
         animals.add(animal);
         animal.setLocation(row, col);
         field.place(animal, row, col);
     }
 
+    /**
+     * Define cores e multiplicadores iniciais das espécies por padrão.
+     */
     private static void defaultSpeciesConfig() {
         speciesConfig.setColor(new Fox(false), new Color(255,153,51));
         speciesConfig.setColor(new Rabbit(false), Color.white);
         speciesConfig.setColor(new Fish(false), new Color(230, 0, 0));
-        // multiplicadores sazonais defaults (ex.: primavera=1.2, inverno=0.7)
         speciesConfig.setBreedingMultiplier("spring", 1.2);
         speciesConfig.setBreedingMultiplier("summer", 1.0);
         speciesConfig.setBreedingMultiplier("autumn", 0.9);
         speciesConfig.setBreedingMultiplier("winter", 0.7);
-        // Peixes não reproduzem no inverno
-        speciesConfig.setBreedingMultiplierFor("winter", new Fish(false), 0.0);
     }
 
+    /**
+     * Define nome, duração e cores iniciais das estações por padrão.
+     */
     private static SeasonCycle defaultSeasonCycle() {
         SeasonPhase spring = new SeasonPhase("spring", 100, new Color(141,182,0), new Color(42,157,244));
         SeasonPhase summer = new SeasonPhase("summer", 100, new Color(141,182,0), new Color(42,157,244));

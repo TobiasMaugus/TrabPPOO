@@ -6,6 +6,11 @@ import java.awt.Color;
  */
 public class SimulationConfigLoader{
     
+    /**
+     * Carrega as configurações de simulação definidas em um arquivo.txt
+     * 
+     * @param filePath Caminho do arquivo
+     */
     public static SimulationConfig loadFromFile(String filePath) throws IOException{
         SimulationConfig config = SimulationConfig.getInstance();
         SpeciesConfigLoader speciesConfig = SpeciesConfigLoader.getInstance();

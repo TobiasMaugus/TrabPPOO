@@ -1,7 +1,7 @@
 import java.util.Random;
 
 /**
- * Contexto de simulação contendo dependências injetadas como Random e configuração de espécies.
+ * Contexto de simulação contendo dependências como configuração de espécies.
  */
 public class SimulationContext{
     private final Random random;
@@ -9,10 +9,15 @@ public class SimulationContext{
     private SeasonCycle seasonCycle;
     private int currentStep;
 
-    public SimulationContext(Random random){
-        this.random = random;
+    /**
+     * Cria um contexto de Simulação com uma configuração de espécies
+     */
+    public SimulationContext(){
+        this.random = new Random();
         this.speciesConfig = SpeciesConfigLoader.getInstance();
     }
+
+    /** Getters e setters básicos */
 
     public Random getRandom(){
         return random;

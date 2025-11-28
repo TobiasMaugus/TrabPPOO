@@ -1,18 +1,17 @@
 /**
- * Represent a location in a rectangular grid.
- * 
- * @author David J. Barnes and Michael Kolling
- * @version 2002-04-09
+ * Representa uma posição em uma grade retangular.
+ * Cada localização possui uma linha e uma coluna.
  */
 public class Location{
-    // Row and column positions.
+    /** Linha da posição na grade. */
     private int row;
+    /** Coluna da posição na grade. */
     private int col;
 
     /**
-     * Represent a row and column.
-     * @param row The row.
-     * @param col The column.
+     * Cria uma nova localização especificando linha e coluna.
+     * @param row A linha.
+     * @param col A coluna.
      */
     public Location(int row, int col){
         this.row = row;
@@ -20,7 +19,8 @@ public class Location{
     }
     
     /**
-     * Implement content equality.
+     * Verifica igualdade de conteúdo entre duas localizações.
+     * Duas Location são iguais se possuem mesma linha e coluna.
      */
     @Override
     public boolean equals(Object obj){
@@ -34,8 +34,7 @@ public class Location{
     }
     
     /**
-     * Return a string of the form row,column
-     * @return A string representation of the location.
+     * Retorna representação textual no formato "linha,coluna".
      */
     @Override
     public String toString(){
@@ -43,25 +42,20 @@ public class Location{
     }
     
     /**
-     * Use the top 16 bits for the row value and the bottom for
-     * the column. Except for very big grids, this should give a
-     * unique hash code for each (row, col) pair.
+     * Gera um hash code baseado nos valores de linha e coluna.
+     * Usa 16 bits superiores para a linha e 16 inferiores para a coluna.
      */
     @Override
     public int hashCode(){
         return (row << 16) + col;
     }
     
-    /**
-     * @return The row.
-     */
+    /** @return A linha da localização. */
     public int getRow(){
         return row;
     }
     
-    /**
-     * @return The column.
-     */
+    /** @return A coluna da localização. */
     public int getCol(){
         return col;
     }

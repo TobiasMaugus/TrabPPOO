@@ -1,7 +1,8 @@
 import java.util.List;
 import java.util.ArrayList;
+
 /**
- * Configuração de simulação carregada de arquivo .txt
+ * Representa a configuração de simulação da aplicação
  */
 public class SimulationConfig{
     private static SimulationConfig instanciaUnica;
@@ -12,18 +13,28 @@ public class SimulationConfig{
     private List<SeasonPhase> seasons = new ArrayList<SeasonPhase>();
     private List<LakeConfig> lakes = new ArrayList<LakeConfig>();
 
+    /**
+     * Cria uma configuração de Simulação com tamanho do grid e máximo de steps padrões
+     */
+
     private SimulationConfig(){
         gridHeight = 50;
         gridWidth = 50;
         maxSteps = 500;
     }
 
+    /**
+     * Cria uma única configuração de Simulação para todo o sistema. 
+     * Utiliza o padrão Singleton
+     */
     public static SimulationConfig getInstance(){
         if(instanciaUnica == null){
             instanciaUnica = new SimulationConfig();
         }
         return instanciaUnica;
     }
+
+    /** Getters e setters básicos */
     
     public int getGridWidth(){ 
         return gridWidth; 
