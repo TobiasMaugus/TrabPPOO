@@ -2,131 +2,96 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 /**
- * This class collects and provides some statistical data on the state 
- * of a field. It is flexible: it will create and maintain a counter 
- * for any class of object that is found within the field.
- * 
- * @author David J. Barnes and Michael Kolling
- * @version 2002-04-23
+ * Classe responsável por coletar e fornecer estatísticas sobre o estado do campo.
+ * Ela é flexível, criando contadores dinamicamente para cada tipo de animal encontrado.
  */
-public class FieldStats
-{
-    // Counters for each type of entity (fox, rabbit, etc.) in the simulation.
+public class FieldStats {
+    /** Mapa que associa cada espécie de animal ao seu respectivo contador. */
     private HashMap<Animal, Counter> counters;
-    // Whether the counters are currently up to date.
+
+    /** Indica se os valores atuais dos contadores estão válidos ou precisam ser atualizados. */
     private boolean countsValid;
 
     /**
-     * Construct a field-statistics object.
+     * Construtor padrão da classe de estatísticas do campo.
+     * Inicializa o mapa de contadores e marca as estatísticas como válidas.
      */
-    public FieldStats()
-    {
-        // Set up a collection for counters for each type of animal that
-        // we might find
-        counters = new HashMap<> ();
+    public FieldStats() {
+        counters = new HashMap<>();
         countsValid = true;
     }
 
     /**
-     * @return A string describing what animals are in the field.
+     * Invalida as estatísticas atuais e reseta todos os contadores para zero.
      */
-    public String getPopulationDetails(Field field)
-    {
-        StringBuilder buffer = new StringBuilder();
-        if(!countsValid) {
-            generateCounts(field);
-        }
-        Iterator<Animal> keys = counters.keySet().iterator();
-        while(keys.hasNext()) {
-            Counter info = counters.get(keys.next());
-            buffer.append(info.getName());
-            buffer.append(": ");
-            buffer.append(info.getCount());
-            buffer.append(' ');
-        }
-        return buffer.toString();
-    }
-    
-    /**
-     * Invalidate the current set of statistics; reset all 
-     * counts to zero.
-     */
-    public void reset()
-    {
+    public void reset() {
         countsValid = false;
         Iterator<Animal> keys = counters.keySet().iterator();
-        while(keys.hasNext()) {
+        while (keys.hasNext()) {
             Counter counter = counters.get(keys.next());
             counter.reset();
         }
     }
 
     /**
-     * Increment the count for one class of animal.
+     * Incrementa o contador da espécie correspondente.
+     * Caso a espécie ainda não possua um contador, um novo é criado.
      */
-    public void incrementCount(Animal animalClass)
-    {
-        Counter counter = (Counter) counters.get(animalClass);
-        if(counter == null) {
-            // we do not have a counter for this species yet - create one
+    public void incrementCount(Animal animalClass) {
+        Counter counter = counters.get(animalClass);
+        if (counter == null) {
             counter = new Counter(getDisplayName(animalClass));
             counters.put(animalClass, counter);
         }
         counter.increment();
     }
 
-    private String getDisplayName(Animal animalClass)
-    {
+    /**
+     * Retorna o nome a ser exibido para a classe do animal.
+     * Realiza pluralização simples para algumas espécies.
+     */
+    private String getDisplayName(Animal animalClass) {
         String simple = animalClass.getClass().getSimpleName().toLowerCase();
-        if("fox".equals(simple)) return "foxes";
-        if("rabbit".equals(simple)) return "rabbits";
-        if("fish".equals(simple)) return "fishes";
+        if ("fox".equals(simple)) return "foxes";
+        if ("rabbit".equals(simple)) return "rabbits";
+        if ("fish".equals(simple)) return "fishes";
         return simple;
     }
 
-    /**
-     * Indicate that an animal count has been completed.
-     */
-    public void countFinished()
-    {
+    /** Marca que a contagem de animais foi finalizada e está atualizada. */
+    public void countFinished() {
         countsValid = true;
     }
 
     /**
-     * Determine whether the simulation is still viable.
-     * I.e., should it continue to run.
-     * @return true If there is more than one species alive.
+     * Verifica se a simulação ainda é viável, ou seja, se mais de uma espécie está viva.
+     * @return true se houver mais de uma espécie com contagem maior que zero.
      */
-    public boolean isViable(Field field)
-    {
-        // How many counts are non-zero.
+    public boolean isViable(Field field) {
         int nonZero = 0;
-        if(!countsValid) {
+        if (!countsValid) {
             generateCounts(field);
         }
         Iterator<Animal> keys = counters.keySet().iterator();
-        while(keys.hasNext()) {
+        while (keys.hasNext()) {
             Counter info = counters.get(keys.next());
-            if(info.getCount() > 0) {
+            if (info.getCount() > 0) {
                 nonZero++;
             }
         }
         return nonZero > 1;
     }
-    
+
     /**
-     * Generate counts of the number of foxes and rabbits.
-     * These are not kept up to date as foxes and rabbits
-     * are placed in the field, but only when a request
-     * is made for the information.
+     * Gera as contagens de todas as espécies presentes no campo.
+     * A contagem só é atualizada quando solicitada.
      */
-    private void generateCounts(Field field)
-    {
+    private void generateCounts(Field field) {
         reset();
-        for(int row = 0; row < field.getDepth(); row++) {
-            for(int col = 0; col < field.getWidth(); col++) {
+        for (int row = 0; row < field.getDepth(); row++) {
+            for (int col = 0; col < field.getWidth(); col++) {
                 Animal animal = field.getObjectAt(row, col);
-                if(animal != null) {
+                if (animal != null) {
                     incrementCount(animal);
                 }
             }

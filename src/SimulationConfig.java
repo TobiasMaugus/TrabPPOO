@@ -3,7 +3,7 @@ import java.util.ArrayList;
 /**
  * Configuração de simulação carregada de arquivo .txt
  */
-public class SimulationConfig {
+public class SimulationConfig{
     private static SimulationConfig instanciaUnica;
 
     private int gridWidth;
@@ -25,43 +25,43 @@ public class SimulationConfig {
         return instanciaUnica;
     }
     
-    public int getGridWidth() { 
+    public int getGridWidth(){ 
         return gridWidth; 
     }
 
-    public int getGridHeight() { 
+    public int getGridHeight(){ 
         return gridHeight; 
     }
 
-    public int getMaxSteps() { 
+    public int getMaxSteps(){ 
         return maxSteps; 
     }
 
-    public List<SeasonPhase> getSeasons() { 
+    public List<SeasonPhase> getSeasons(){ 
         return seasons; 
     }
 
-    public List<LakeConfig> getLakes() { 
+    public List<LakeConfig> getLakes(){ 
         return lakes; 
     }
     
-    public void setGridWidth(int width) { 
+    public void setGridWidth(int width){ 
         gridWidth = width; 
     }
 
-    public void setGridHeight(int height) { 
+    public void setGridHeight(int height){ 
         gridHeight = height; 
     }
 
-    public void setMaxSteps(int steps) { 
+    public void setMaxSteps(int steps){ 
         maxSteps = steps; 
     }
 
-    public void addSeason(SeasonPhase season) { 
+    public void addSeason(SeasonPhase season){ 
         seasons.add(season); 
     }
 
-    public void addLake(LakeConfig lake) { 
+    public void addLake(LakeConfig lake){ 
         lakes.add(lake); 
     }
 }

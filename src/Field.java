@@ -1,151 +1,132 @@
-import java.util.Collections;
 import java.util.Iterator;
-import java.util.ArrayList;
-import java.util.Random;
 
 /**
- * Represent a rectangular grid of field positions.
- * Each position is able to store a single animal.
- * 
- * @author David J. Barnes and Michael Kolling
- * @version 2002-04-09
+ * Representa uma grade retangular do campo de simulação,
+ * onde cada posição pode armazenar um único animal.
+ * Também mantém um mapa de células de água, impedindo
+ * que animais ocupem esses espaços.
  */
-public class Field
-{
-    private static final Random rand = new Random();
-    
-    // The depth and width of the field.
+public class Field {
+    /** Gerador de números aleatórios usado para posições adjacentes. */
+    private static final java.util.Random rand = new java.util.Random();
+
+    /** Profundidade (número de linhas) e largura (número de colunas) do campo. */
     private int depth, width;
-    // Storage for the animals.
+
+    /** Matriz que armazena os animais presentes no campo. */
     private Animal[][] field;
-    // Mask of water cells (true means water/lake)
+
+    /** Máscara que indica quais posições são água (true = água/lago). */
     private boolean[][] water;
 
     /**
-     * Represent a field of the given dimensions.
-     * @param depth The depth of the field.
-     * @param width The width of the field.
+     * Constrói um campo com dimensões especificadas.
+     * @param depth Número de linhas.
+     * @param width Número de colunas.
      */
-    public Field(int depth, int width)
-    {
+    public Field(int depth, int width) {
         this.depth = depth;
         this.width = width;
         field = new Animal[depth][width];
         water = new boolean[depth][width];
     }
-    
+
     /**
-     * Empty the field.
+     * Esvazia o campo, removendo todos os animais.
      */
-    public void clear()
-    {
-        for(int row = 0; row < depth; row++) {
-            for(int col = 0; col < width; col++) {
+    public void clear() {
+        for (int row = 0; row < depth; row++) {
+            for (int col = 0; col < width; col++) {
                 field[row][col] = null;
             }
         }
     }
 
     /**
-     * Place an animal at the given location.
-     * If there is already an animal at the location it will
-     * be lost.
-     * @param animal The animal to be placed.
-     * @param location Where to place the animal.
+     * Coloca um animal em uma posição específica.
+     * @param animal Animal a ser posicionado.
+     * @param location Local onde será colocado.
      */
-    public void place(Animal animal, Location location)
-    {
+    public void place(Animal animal, Location location) {
         place(animal, location.getRow(), location.getCol());
     }
-    
+
     /**
-     * Place an animal at the given location.
-     * If there is already an animal at the location it will
-     * be lost.
-     * @param animal The animal to be placed.
-     * @param row Row coordinate of the location.
-     * @param col Column coordinate of the location.
+     * Coloca um animal em uma posição (linha, coluna).
+     * @param animal Animal a ser posicionado.
+     * @param row Linha.
+     * @param col Coluna.
      */
-    public void place(Animal animal, int row, int col)
-    {
+    public void place(Animal animal, int row, int col) {
         field[row][col] = animal;
     }
-    
+
     /**
-     * Return the animal at the given location, if any.
-     * @param location Where in the field.
-     * @return The animal at the given location, or null if there is none.
+     * Retorna o animal na posição especificada, caso exista.
+     * @param location Posição desejada.
+     * @return Animal encontrado ou null.
      */
-    public Animal getObjectAt(Location location)
-    {
+    public Animal getObjectAt(Location location) {
         return getObjectAt(location.getRow(), location.getCol());
     }
-    
+
     /**
-     * Return the animal at the given location, if any.
-     * @param row The desired row.
-     * @param col The desired column.
-     * @return The animal at the given location, or null if there is none.
+     * Retorna o animal na posição (linha, coluna), caso exista.
      */
-    public Animal getObjectAt(int row, int col)
-    {
+    public Animal getObjectAt(int row, int col) {
         return field[row][col];
     }
 
     /**
-     * Define uma região retangular de lago centrada em (centerRow, centerCol)
-     * com dimensões lakeHeight x lakeWidth. Valores fora dos limites são ignorados.
+     * Marca uma região retangular como lago, impedindo presença de animais.
+     * @param centerRow Linha central.
+     * @param centerCol Coluna central.
+     * @param lakeHeight Altura do lago.
+     * @param lakeWidth Largura do lago.
      */
-    public void addLake(int centerRow, int centerCol, int lakeHeight, int lakeWidth)
-    {
-        if(lakeHeight <= 0 || lakeWidth <= 0) return;
+    public void addLake(int centerRow, int centerCol, int lakeHeight, int lakeWidth) {
+        if (lakeHeight <= 0 || lakeWidth <= 0) return;
         int halfH = lakeHeight / 2;
         int halfW = lakeWidth / 2;
         int startRow = Math.max(0, centerRow - halfH);
         int endRow = Math.min(depth - 1, centerRow + halfH);
         int startCol = Math.max(0, centerCol - halfW);
         int endCol = Math.min(width - 1, centerCol + halfW);
-        for(int r = startRow; r <= endRow; r++) {
-            for(int c = startCol; c <= endCol; c++) {
+
+        for (int r = startRow; r <= endRow; r++) {
+            for (int c = startCol; c <= endCol; c++) {
                 water[r][c] = true;
-                field[r][c] = null; // garante que não haja animais sobre água
+                field[r][c] = null;
             }
         }
     }
 
-    public boolean isWater(Location location)
-    {
+    /** Verifica se a posição informada é água. */
+    public boolean isWater(Location location) {
         return isWater(location.getRow(), location.getCol());
     }
 
-    public boolean isWater(int row, int col)
-    {
+    /** Verifica se a posição (linha, coluna) é água. */
+    public boolean isWater(int row, int col) {
         return water[row][col];
     }
-    
+
     /**
-     * Generate a random location that is adjacent to the
-     * given location, or is the same location.
-     * The returned location will be within the valid bounds
-     * of the field.
-     * @param location The location from which to generate an adjacency.
-     * @return A valid location within the grid area. This
-     *         may be the same object as the location parameter.
+     * Gera uma posição aleatória adjacente à informada, dentro dos limites.
+     * Pode retornar a própria posição original.
      */
-    public Location randomAdjacentLocation(Location location)
-    {
+    public Location randomAdjacentLocation(Location location) {
         int row = location.getRow();
         int col = location.getCol();
-        // Generate an offset of -1, 0, or +1 for both the current row and col.
+
         int nextRow = row + rand.nextInt(3) - 1;
         int nextCol = col + rand.nextInt(3) - 1;
-        // Check in case the new location is outside the bounds.
-        if(nextRow < 0 || nextRow >= depth || nextCol < 0 || nextCol >= width) {
+
+        if (nextRow < 0 || nextRow >= depth || nextCol < 0 || nextCol >= width) {
             return location;
         }
-        else if(nextRow != row || nextCol != col) {
-            // evita retornar água; se água, permanece
-            if(!isWater(nextRow, nextCol)) {
+        else if (nextRow != row || nextCol != col) {
+            if (!isWater(nextRow, nextCol)) {
                 return new Location(nextRow, nextCol);
             } else {
                 return location;
@@ -155,50 +136,20 @@ public class Field
             return location;
         }
     }
-    
-    /**
-     * Try to find a free location that is adjacent to the
-     * given location. If there is none, then return the current
-     * location if it is free. If not, return null.
-     * The returned location will be within the valid bounds
-     * of the field.
-     * @param location The location from which to generate an adjacency.
-     * @return A valid location within the grid area. This may be the
-     *         same object as the location parameter, or null if all
-     *         locations around are full.
-     */
-    public Location freeAdjacentLocation(Location location)
-    {
-        Iterator<Location> adjacent = adjacentLocations(location);
-        while(adjacent.hasNext()) {
-            Location next = adjacent.next();
-            if(!isWater(next) && field[next.getRow()][next.getCol()] == null) {
-                return next;
-            }
-        }
-        // check whether current location is free
-        if(!isWater(location) && field[location.getRow()][location.getCol()] == null) {
-            return location;
-        } 
-        else {
-            return null;
-        }
-    }
 
     /**
-     * Tenta encontrar uma localização livre adjacente que seja água.
-     * Caso não haja, retorna a atual se for água e estiver livre; senão null.
+     * Encontra uma posição livre adjacente (não água). Caso não haja,
+     * retorna a própria posição se estiver livre; senão, null.
      */
-    public Location freeAdjacentWaterLocation(Location location)
-    {
+    public Location freeAdjacentLocation(Location location) {
         Iterator<Location> adjacent = adjacentLocations(location);
-        while(adjacent.hasNext()) {
+        while (adjacent.hasNext()) {
             Location next = adjacent.next();
-            if(isWater(next) && field[next.getRow()][next.getCol()] == null) {
+            if (!isWater(next) && field[next.getRow()][next.getCol()] == null) {
                 return next;
             }
         }
-        if(isWater(location) && field[location.getRow()][location.getCol()] == null) {
+        if (!isWater(location) && field[location.getRow()][location.getCol()] == null) {
             return location;
         } else {
             return null;
@@ -206,14 +157,31 @@ public class Field
     }
 
     /**
-     * Gera uma localização aleatória adjacente que seja água, ou retorna a atual se nenhuma.
+     * Encontra posição livre adjacente que seja água.
      */
-    public Location randomAdjacentWaterLocation(Location location)
-    {
+    public Location freeAdjacentWaterLocation(Location location) {
         Iterator<Location> adjacent = adjacentLocations(location);
-        while(adjacent.hasNext()) {
+        while (adjacent.hasNext()) {
             Location next = adjacent.next();
-            if(isWater(next)) {
+            if (isWater(next) && field[next.getRow()][next.getCol()] == null) {
+                return next;
+            }
+        }
+        if (isWater(location) && field[location.getRow()][location.getCol()] == null) {
+            return location;
+        }
+        return null;
+    }
+
+    /**
+     * Retorna localização adjacente aleatória que seja água,
+     * ou a atual caso nenhuma exista.
+     */
+    public Location randomAdjacentWaterLocation(Location location) {
+        java.util.Iterator<Location> adjacent = adjacentLocations(location);
+        while (adjacent.hasNext()) {
+            Location next = adjacent.next();
+            if (isWater(next)) {
                 return next;
             }
         }
@@ -221,46 +189,36 @@ public class Field
     }
 
     /**
-     * Generate an iterator over a shuffled list of locations adjacent
-     * to the given one. The list will not include the location itself.
-     * All locations will lie within the grid.
-     * @param location The location from which to generate adjacencies.
-     * @return An iterator over locations adjacent to that given.
+     * Gera um iterador para posições adjacentes embaralhadas.
      */
-    public Iterator<Location> adjacentLocations(Location location)
-    {
+    public java.util.Iterator<Location> adjacentLocations(Location location) {
         int row = location.getRow();
         int col = location.getCol();
-        ArrayList<Location> locations = new ArrayList<Location>();
-        for(int roffset = -1; roffset <= 1; roffset++) {
+        java.util.ArrayList<Location> locations = new java.util.ArrayList<>();
+
+        for (int roffset = -1; roffset <= 1; roffset++) {
             int nextRow = row + roffset;
-            if(nextRow >= 0 && nextRow < depth) {
-                for(int coffset = -1; coffset <= 1; coffset++) {
+            if (nextRow >= 0 && nextRow < depth) {
+                for (int coffset = -1; coffset <= 1; coffset++) {
                     int nextCol = col + coffset;
-                    // Exclude invalid locations and the original location.
-                    if(nextCol >= 0 && nextCol < width && (roffset != 0 || coffset != 0)) {
+                    if (nextCol >= 0 && nextCol < width && (roffset != 0 || coffset != 0)) {
                         locations.add(new Location(nextRow, nextCol));
                     }
                 }
             }
         }
-        Collections.shuffle(locations,rand);
+
+        java.util.Collections.shuffle(locations, rand);
         return locations.iterator();
     }
 
-    /**
-     * @return The depth of the field.
-     */
-    public int getDepth()
-    {
+    /** @return Profundidade do campo. */
+    public int getDepth() {
         return depth;
     }
-    
-    /**
-     * @return The width of the field.
-     */
-    public int getWidth()
-    {
+
+    /** @return Largura do campo. */
+    public int getWidth() {
         return width;
     }
 }

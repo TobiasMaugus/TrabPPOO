@@ -4,8 +4,7 @@
  * @author David J. Barnes and Michael Kolling
  * @version 2002-04-09
  */
-public class Location
-{
+public class Location{
     // Row and column positions.
     private int row;
     private int col;
@@ -15,8 +14,7 @@ public class Location
      * @param row The row.
      * @param col The column.
      */
-    public Location(int row, int col)
-    {
+    public Location(int row, int col){
         this.row = row;
         this.col = col;
     }
@@ -25,13 +23,12 @@ public class Location
      * Implement content equality.
      */
     @Override
-    public boolean equals(Object obj)
-    {
-        if(obj instanceof Location) {
+    public boolean equals(Object obj){
+        if(obj instanceof Location){
             Location other = (Location) obj;
             return row == other.getRow() && col == other.getCol();
         }
-        else {
+        else{
             return false;
         }
     }
@@ -41,8 +38,7 @@ public class Location
      * @return A string representation of the location.
      */
     @Override
-    public String toString()
-    {
+    public String toString(){
         return row + "," + col;
     }
     
@@ -52,24 +48,21 @@ public class Location
      * unique hash code for each (row, col) pair.
      */
     @Override
-    public int hashCode()
-    {
+    public int hashCode(){
         return (row << 16) + col;
     }
     
     /**
      * @return The row.
      */
-    public int getRow()
-    {
+    public int getRow(){
         return row;
     }
     
     /**
      * @return The column.
      */
-    public int getCol()
-    {
+    public int getCol(){
         return col;
     }
 }

@@ -40,26 +40,12 @@ public class Simulator{
     private SeasonCycle seasonCycle;
         // configuração de múltiplos lagos
     private List<int[]> lakes = new ArrayList<int[]>(); // each: {centerRow, centerCol, height, width}
-    
-    /**
-     * Construct a simulation field with default size.
-     */
-    public Simulator()
-    {
-        this(simulationConfig.getGridHeight(), simulationConfig.getGridWidth(), new Random());
-    }
-    
-    /**
-     * Create a simulation field with the given size.
-     * @param depth Depth of the field. Must be greater than zero.
-     * @param width Width of the field. Must be greater than zero.
-     */
-    public Simulator(int depth, int width)
-    {
-        this(depth, width, new Random());
-    }
 
-    public Simulator(int depth, int width, Random random){
+    public Simulator(){
+        int depth = simulationConfig.getGridHeight();
+        int width = simulationConfig.getGridWidth();
+        Random random = new Random();
+
         animals = new ArrayList<Animal>();
         newAnimals = new ArrayList<Animal>();
         field = new Field(depth, width);
@@ -77,24 +63,23 @@ public class Simulator{
         reset();
     }
     
-    
     /**
      * Run the simulation from its current state for the given number of steps.
      * Stop before the given number of steps if it ceases to be viable.
-     */
-    public void simulate(int numSteps)
-    {
+     
+    public void simulate(int numSteps){
         // Mantido para compatibilidade, mas controle preferido é Play/Pause.
-        for(int step = 1; step <= numSteps && view.isViable(field); step++) simulateOneStep();
+        for(int step = 1; step <= numSteps && view.isViable(field); step++) 
+            simulateOneStep();
     }
+    */
     
     /**
      * Run the simulation from its current state for a single step.
      * Iterate over the whole field updating the state of each
      * fox and rabbit.
      */
-    public void simulateOneStep()
-    {
+    public void simulateOneStep(){
         step++;
         context.setCurrentStep(step);
         newAnimals.clear();
@@ -176,7 +161,8 @@ public class Simulator{
     }
     
     public synchronized void increaseSpeed() {
-        if (speedLevel < 15) speedLevel++;
+        if (speedLevel < 15) 
+            speedLevel++;
     }
     
     public synchronized void increaseSpeedBy5() {
@@ -184,7 +170,8 @@ public class Simulator{
     }
     
     public synchronized void decreaseSpeed() {
-        if (speedLevel > 1) speedLevel--;
+        if (speedLevel > 1) 
+            speedLevel--;
     }
     
     public synchronized void decreaseSpeedBy5() {

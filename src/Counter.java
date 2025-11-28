@@ -1,58 +1,45 @@
 /**
- * Provide a counter for a participant in the simulation.
- * This includes an identifying string and a count of how
- * many participants of this type currently exist within 
- * the simulation.
- * 
- * @author David J. Barnes and Michael Kolling
- * @version 2002-04-23
+ * Classe responsável por manter um contador de participantes de um tipo específico
+ * dentro da simulação. Armazena um nome identificador e a quantidade atual
+ * de instâncias existentes.
  */
-public class Counter
-{
-    // A name for this type of simulation participant
+public class Counter {
+    /** Nome que identifica o tipo de participante monitorado pelo contador. */
     private String name;
-    // How many of this type exist in the simulation.
+
+    /** Quantidade atual de participantes desse tipo na simulação. */
     private int count;
 
     /**
-     * Provide a name for one of the simulation types.
-     * @param name  A name, e.g. "Fox".
+     * Constrói um contador para um tipo específico de participante.
+     * @param name Nome representando o tipo (ex.: "Raposa").
      */
-    public Counter(String name)
-    {
+    public Counter(String name) {
         this.name = name;
         count = 0;
     }
-    
-    /**
-     * @return The short description of this type.
-     */
-    public String getName()
-    {
+
+    /** @return O nome associado a este tipo de participante. */
+    public String getName() {
         return name;
     }
 
-    /**
-     * @return The current count for this type.
-     */
-    public int getCount()
-    {
+    /** @return A contagem atual de participantes desse tipo. */
+    public int getCount() {
         return count;
     }
 
     /**
-     * Increment the current count by one.
+     * Incrementa a contagem em uma unidade.
      */
-    public void increment()
-    {
+    public void increment() {
         count++;
     }
-    
+
     /**
-     * Reset the current count to zero.
+     * Reinicia a contagem para zero.
      */
-    public void reset()
-    {
+    public void reset() {
         count = 0;
     }
 }

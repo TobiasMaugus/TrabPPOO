@@ -18,8 +18,7 @@ import java.util.Set;
  * @author David J. Barnes and Michael Kolling
  * @version 2002-04-23
  */
-public class SimulatorView extends JFrame
-{
+public class SimulatorView extends JFrame{
     // Colors used for empty locations.
     private static final Color DEFAULT_EMPTY_COLOR = Color.white;
     private static final Color DEFAULT_WATER_COLOR = new Color(180, 220, 255);
@@ -79,6 +78,7 @@ public class SimulatorView extends JFrame
         JButton speedUp5 = new JButton("+5");
         JButton speedDown1 = new JButton("-1");
         JButton speedDown5 = new JButton("-5");
+
         playPause.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent e){
                 if(simulator.isRunning()) {
@@ -90,6 +90,7 @@ public class SimulatorView extends JFrame
                 }
             }
         });
+
         resetBtn.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent e){
                 simulator.pauseSimulation();
@@ -97,15 +98,16 @@ public class SimulatorView extends JFrame
                 playPause.setText("PLAY");
             }
         });
+
         loadConfigBtn.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent e){
                 JFileChooser chooser = new JFileChooser();
                 chooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("Text files", "txt"));
-                if (chooser.showOpenDialog(SimulatorView.this) == JFileChooser.APPROVE_OPTION) {
-                    try {
+                if (chooser.showOpenDialog(SimulatorView.this) == JFileChooser.APPROVE_OPTION){
+                    try{
                         simulator.loadConfiguration(chooser.getSelectedFile().getAbsolutePath());
                         configFileLabel.setText("Config: " + chooser.getSelectedFile().getName());
-                    } catch (Exception ex) {
+                    }catch (Exception ex){
                         JOptionPane.showMessageDialog(SimulatorView.this, "Error loading config: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                     }
                 }
@@ -119,24 +121,28 @@ public class SimulatorView extends JFrame
                 updateSpeedLabel();
             }
         });
+
         speedUp5.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent e){
                 simulator.increaseSpeedBy5();
                 updateSpeedLabel();
             }
         });
+
         speedDown1.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent e){
                 simulator.decreaseSpeed();
                 updateSpeedLabel();
             }
         });
+
         speedDown5.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent e){
                 simulator.decreaseSpeedBy5();
                 updateSpeedLabel();
             }
         });
+
         controls.add(loadConfigBtn);
         controls.add(playPause);
         controls.add(resetBtn);
@@ -154,10 +160,12 @@ public class SimulatorView extends JFrame
         topPanel.add(controls);
         contents.add(topPanel, BorderLayout.NORTH);
         contents.add(fieldView, BorderLayout.CENTER);
+
         // Legenda na lateral direita
         legendPanel = new JPanel();
         legendPanel.setLayout(new BoxLayout(legendPanel, BoxLayout.Y_AXIS));
         contents.add(new JScrollPane(legendPanel), BorderLayout.EAST);
+
         // Oculta a linha de população textual na base
         contents.add(population, BorderLayout.SOUTH);
         population.setVisible(false);
@@ -168,18 +176,18 @@ public class SimulatorView extends JFrame
     /**
      * Define a color to be used for a given class of animal.
      */
-    public void setColor(Animal animalClass, Color color)
-    {
+    public void setColor(Animal animalClass, Color color){
         colors.put(animalClass, color);
     }
 
     /**
      * Define a color to be used for a given class of animal.
      */
-    private Color getColor(Animal animalClass)
-    {
+    private Color getColor(Animal animalClass){
         Color cfg = speciesConfig.getColor(animalClass);
-        if(cfg != Color.gray) return cfg;
+
+        if(cfg != Color.gray) 
+            return cfg;
         Color col = (Color)colors.get(animalClass);
         return col != null ? col : UNKNOWN_COLOR;
     }
@@ -189,15 +197,15 @@ public class SimulatorView extends JFrame
      * @param step Which iteration step it is.
      * @param stats Status of the field to be represented.
      */
-    public void showStatus(int step, Field field, String seasonName)
-    {
+    public void showStatus(int step, Field field, String seasonName){
         if(!isVisible())
             setVisible(true);
 
         stepLabel.setText(STEP_PREFIX + step);
-        if(seasonName != null) {
+        if(seasonName != null){
             seasonLabel.setText(SEASON_PREFIX + seasonName);
-        } else {
+        }
+        else{
             seasonLabel.setText(SEASON_PREFIX + "-");
         }
 
@@ -205,7 +213,7 @@ public class SimulatorView extends JFrame
         fieldView.preparePaint();
         Map<Animal, Integer> counts = new HashMap<Animal, Integer>();
             
-        for(int row = 0; row < field.getDepth(); row++) {
+        for(int row = 0; row < field.getDepth(); row++){
             for(int col = 0; col < field.getWidth(); col++) {
                 Animal animal = field.getObjectAt(row, col);
                 if(animal != null) {
@@ -229,13 +237,13 @@ public class SimulatorView extends JFrame
         fieldView.repaint();
     }
 
-    private void updateSpeedLabel() {
+    private void updateSpeedLabel(){
         int level = simulator.getSpeedLevel();
         int ms = 10 + (level - 1) * 66;
         speedLabel.setText("Speed: " + level + " (" + ms + "ms)");
     }
     
-    private void updateLegend(Map<Animal, Integer> counts) {
+    private void updateLegend(Map<Animal, Integer> counts){
         legendPanel.removeAll();
         // Sempre mostra todas as espécies conhecidas, mesmo com contagem 0
         Set<Animal> allSpecies = new HashSet<>();
@@ -245,7 +253,7 @@ public class SimulatorView extends JFrame
         allSpecies.addAll(counts.keySet());
         ArrayList<Animal> keys = new ArrayList<>(allSpecies);
 
-        for(Animal animal : keys) {
+        for(Animal animal : keys){
             int count = counts.containsKey(animal) ? counts.get(animal).intValue() : 0;
             JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT));
             JPanel swatch = new JPanel();
@@ -263,17 +271,19 @@ public class SimulatorView extends JFrame
         legendPanel.repaint();
     }
 
-    public void setSeasonPhase(SeasonPhase phase) {
+    public void setSeasonPhase(SeasonPhase phase){
         this.currentSeasonPhase = phase;
     }
 
-    private Color getSeasonalEmptyColor() {
-        if(currentSeasonPhase != null) return currentSeasonPhase.getEmptyColor();
+    private Color getSeasonalEmptyColor(){
+        if(currentSeasonPhase != null) 
+            return currentSeasonPhase.getEmptyColor();
         return DEFAULT_EMPTY_COLOR;
     }
 
-    private Color getSeasonalWaterColor() {
-        if(currentSeasonPhase != null) return currentSeasonPhase.getWaterColor();
+    private Color getSeasonalWaterColor(){
+        if(currentSeasonPhase != null) 
+            return currentSeasonPhase.getWaterColor();
         return DEFAULT_WATER_COLOR;
     }
 
@@ -281,8 +291,7 @@ public class SimulatorView extends JFrame
      * Determine whether the simulation should continue to run.
      * @return true If there is more than one species alive.
      */
-    public boolean isViable(Field field)
-    {
+    public boolean isViable(Field field){
         return stats.isViable(field);
     }
     
@@ -294,8 +303,7 @@ public class SimulatorView extends JFrame
      * This is rather advanced GUI stuff - you can ignore this 
      * for your project if you like.
      */
-    private class FieldView extends JPanel
-    {
+    private class FieldView extends JPanel{
         private final int GRID_VIEW_SCALING_FACTOR = 10;
 
         private int gridWidth, gridHeight;
@@ -307,8 +315,7 @@ public class SimulatorView extends JFrame
         /**
          * Create a new FieldView component.
          */
-        public FieldView(int height, int width)
-        {
+        public FieldView(int height, int width){
             gridHeight = height;
             gridWidth = width;
             size = new Dimension(0, 0);
@@ -317,29 +324,26 @@ public class SimulatorView extends JFrame
         /**
          * Tell the GUI manager how big we would like to be.
          */
-        public Dimension getPreferredSize()
-        {
-            return new Dimension(gridWidth * GRID_VIEW_SCALING_FACTOR,
-                                 gridHeight * GRID_VIEW_SCALING_FACTOR);
+        public Dimension getPreferredSize(){
+            return new Dimension(gridWidth * GRID_VIEW_SCALING_FACTOR, gridHeight * GRID_VIEW_SCALING_FACTOR);
         }
         
         /**
          * Prepare for a new round of painting. Since the component
          * may be resized, compute the scaling factor again.
          */
-        public void preparePaint()
-        {
-            if(! size.equals(getSize())) {  // if the size has changed...
+        public void preparePaint(){
+            if(! size.equals(getSize())){  // if the size has changed...
                 size = getSize();
                 fieldImage = fieldView.createImage(size.width, size.height);
                 g = fieldImage.getGraphics();
 
                 xScale = size.width / gridWidth;
-                if(xScale < 1) {
+                if(xScale < 1){
                     xScale = GRID_VIEW_SCALING_FACTOR;
                 }
                 yScale = size.height / gridHeight;
-                if(yScale < 1) {
+                if(yScale < 1){
                     yScale = GRID_VIEW_SCALING_FACTOR;
                 }
             }
@@ -348,8 +352,7 @@ public class SimulatorView extends JFrame
         /**
          * Paint on grid location on this field in a given color.
          */
-        public void drawMark(int x, int y, Color color)
-        {
+        public void drawMark(int x, int y, Color color){
             g.setColor(color);
             g.fillRect(x * xScale, y * yScale, xScale-1, yScale-1);
         }
@@ -358,9 +361,8 @@ public class SimulatorView extends JFrame
          * The field view component needs to be redisplayed. Copy the
          * internal image to screen.
          */
-        public void paintComponent(Graphics g)
-        {
-            if(fieldImage != null) {
+        public void paintComponent(Graphics g){
+            if(fieldImage != null){
                 g.drawImage(fieldImage, 0, 0, null);
             }
         }

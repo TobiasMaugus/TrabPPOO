@@ -7,8 +7,7 @@ import java.util.List;
  * @author David J. Barnes and Michael Kolling
  * @version 2002-04-11
  */
-public class Rabbit extends Animal
-{
+public class Rabbit extends Animal{
     // Características compartilhadas pelos coelhos
     private static final int BREEDING_AGE = 5;
     private static final int MAX_AGE = 50;
@@ -22,8 +21,7 @@ public class Rabbit extends Animal
      * 
      * @param randomAge If true, the rabbit will have a random age.
      */
-    public Rabbit(boolean randomAge)
-    {
+    public Rabbit(boolean randomAge){
         super(randomAge);
     }
     
@@ -32,12 +30,11 @@ public class Rabbit extends Animal
      * around. Sometimes it will breed or die of old age.
      */
     @Override
-    public void act(SimulationContext context, Field currentField, Field updatedField, List<Animal> newborns)
-    {
+    public void act(SimulationContext context, Field currentField, Field updatedField, List<Animal> newborns){
         incrementAge();
-        if(isAlive()) {
+        if(isAlive()){
             int births = breed(context);
-            for(int b = 0; b < births; b++) {
+            for(int b = 0; b < births; b++){
                 Rabbit newRabbit = new Rabbit(false);
                 newborns.add(newRabbit);
                 Location loc = updatedField.randomAdjacentLocation(getLocation());
@@ -45,45 +42,44 @@ public class Rabbit extends Animal
                 updatedField.place(newRabbit, loc);
             }
             Location newLocation = updatedField.freeAdjacentLocation(getLocation());
-            if(newLocation != null) {
+            if(newLocation != null){
                 setLocation(newLocation);
                 updatedField.place(this, newLocation);
             }
-            else {
+            else{
                 setDead();
             }
         }
     }
 
     @Override
-    protected int getMaxAge() {
+    protected int getMaxAge(){
         return MAX_AGE;
     }
 
     @Override
-    protected int getBreedingAge() {
+    protected int getBreedingAge(){
         return BREEDING_AGE;
     }
 
     @Override
-    protected double getBreedingProbability() {
+    protected double getBreedingProbability(){
         return BREEDING_PROBABILITY;
     }
 
     @Override
-    protected int getMaxLitterSize() {
+    protected int getMaxLitterSize(){
         return MAX_LITTER_SIZE;
     }
     
-    public static double getCreationProbability() {
+    public static double getCreationProbability(){
         return CREATION_PROBABILITY;
     }
 
     /**
      * Tell the rabbit that it's dead now :(
      */
-    public void setEaten()
-    {
+    public void setEaten(){
         setDead();
     }
 }

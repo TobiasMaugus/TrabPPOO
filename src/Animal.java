@@ -2,55 +2,64 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * Base abstrata para todos os animais. Centraliza estado e comportamentos comuns
- * como idade, vida e localização, além de definir o contrato de ação por turno.
- * 
- * @version 1.0
+ * Classe abstrata que representa a base para todos os animais do sistema.
+ * Centraliza estado e comportamentos comuns, como idade, condição de vida e localização.
+ * Também define o contrato para ações realizadas em cada turno da simulação.
  */
 public abstract class Animal {
-    // Número aleatório
+    /** Gerador de números aleatórios compartilhado entre todos os animais. */
     private static final Random rand = new Random();
 
-    // Estado comum
+    /** Idade atual do animal. */
     private int age;
+    /** Indica se o animal ainda está vivo. */
     private boolean alive;
+    /** Localização atual do animal no campo de simulação. */
     private Location location;
 
+    /**
+     * Construtor base para animais.
+     * Pode iniciar com idade aleatória até o limite máximo da espécie, caso especificado.
+     */
     public Animal(boolean randomAge) {
         age = 0;
         alive = true;
-        if(randomAge) {
+        if (randomAge) {
             age = rand.nextInt(getMaxAge());
         }
     }
 
     /**
-     * Executa a ação do animal em um passo de simulação. Como não é possível generalizar as ações do animal, 
-     * esse método é implementado nas subclasses.
+     * Executa a ação específica da espécie em um passo da simulação.
+     * O comportamento concreto deve ser implementado nas subclasses.
      */
     public abstract void act(SimulationContext context, Field currentField, Field updatedField, List<Animal> newborns);
 
     /**
-     * Incrementa a idade e mata caso exceda a idade máxima.
+     * Incrementa a idade do animal e o mata caso tenha ultrapassado a idade máxima.
      */
     protected void incrementAge() {
         age++;
-        if(age > getMaxAge()) {
+        if (age > getMaxAge()) {
             setDead();
         }
     }
 
     /**
-     * Reproduz de acordo com probabilidade e limites, usando a fonte de aleatoriedade do contexto.
+     * Controla o processo de reprodução da espécie, verificando probabilidade,
+     * limites e modificadores de estação.
+     * @return quantidade de novos filhotes gerados
      */
     protected int breed(SimulationContext context) {
         int births = 0;
         double prob = getBreedingProbability();
         SeasonPhase phase = context.getCurrentSeason();
-        if(phase != null) {
+
+        if (phase != null) {
             prob = getBreedingProbability() * context.getSpeciesConfig().getBreedingMultiplierFor(phase.getName(), this);
         }
-        if(canBreed() && context.getRandom().nextDouble() <= prob) {
+
+        if (canBreed() && context.getRandom().nextDouble() <= prob) {
             births = context.getRandom().nextInt(getMaxLitterSize()) + 1;
         }
         return births;
@@ -58,11 +67,11 @@ public abstract class Animal {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) 
+        if (this == obj)
             return true;
-        if (obj == null || getClass() != obj.getClass()) 
+        if (obj == null || getClass() != obj.getClass())
             return false;
-        return true; // todos os animais da mesma classe são iguais
+        return true;
     }
 
     @Override
@@ -71,11 +80,13 @@ public abstract class Animal {
     }
 
     /**
-     * Verifica se o animal tem idade suficiente para reproduzir
+     * Verifica se o animal tem idade suficiente para se reproduzir.
      */
     protected boolean canBreed() {
         return age >= getBreedingAge();
     }
+
+    /** Getters e setters básicos. */
 
     public boolean isAlive() {
         return alive;
@@ -106,20 +117,20 @@ public abstract class Animal {
     }
 
     /**
-     * Retorna a idade mínima de reprodução do animal. Como essa idade não pode ser generalizada,
-     * esse método é implementado nas subclasses.
+     * Retorna a idade mínima necessária para que o animal possa reproduzir.
+     * Deve ser implementado pelas subclasses.
      */
     protected abstract int getBreedingAge();
 
     /**
-     * Retorna a idade máximo do animal. Como essa idade não pode ser generalizada,
-     * esse método é implementado nas subclasses.
+     * Retorna a idade máxima que a espécie pode atingir.
+     * Deve ser implementado pelas subclasses.
      */
     protected abstract int getMaxAge();
 
+    /** Probabilidade base de reprodução da espécie. */
     protected abstract double getBreedingProbability();
 
+    /** Tamanho máximo da ninhada gerada pela espécie. */
     protected abstract int getMaxLitterSize();
 }
-
-

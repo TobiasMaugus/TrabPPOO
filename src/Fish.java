@@ -16,12 +16,11 @@ public class Fish extends Animal {
     }
 
     @Override
-    public void act(SimulationContext context, Field currentField, Field updatedField, List<Animal> newborns)
-    {
+    public void act(SimulationContext context, Field currentField, Field updatedField, List<Animal> newborns){
         incrementAge();
-        if(isAlive()) {
+        if(isAlive()){
             int births = breed(context);
-            for(int b = 0; b < births; b++) {
+            for(int b = 0; b < births; b++){
                 Fish newFish = new Fish(false);
                 newborns.add(newFish);
                 Location loc = updatedField.randomAdjacentWaterLocation(getLocation());
@@ -29,10 +28,11 @@ public class Fish extends Animal {
                 updatedField.place(newFish, loc);
             }
             Location newLocation = updatedField.freeAdjacentWaterLocation(getLocation());
-            if(newLocation != null) {
+            if(newLocation != null){
                 setLocation(newLocation);
                 updatedField.place(this, newLocation);
-            } else {
+            } 
+            else{
                 // se não há água livre ao redor e a atual estiver ocupada, o peixe morre por superlotação
                 setDead();
             }
@@ -40,26 +40,26 @@ public class Fish extends Animal {
     }
 
     @Override
-    protected int getMaxAge() {
+    protected int getMaxAge(){
         return MAX_AGE;
     }
 
     @Override
-    protected int getBreedingAge() {
+    protected int getBreedingAge(){
         return BREEDING_AGE;
     }
 
     @Override
-    protected double getBreedingProbability() {
+    protected double getBreedingProbability(){
         return BREEDING_PROBABILITY;
     }
 
     @Override
-    protected int getMaxLitterSize() {
+    protected int getMaxLitterSize(){
         return MAX_LITTER_SIZE;
     }
 
-    public static double getCreationProbability() {
+    public static double getCreationProbability(){
         return CREATION_PROBABILITY;
     }
 }

@@ -8,8 +8,7 @@ import java.util.Iterator;
  * @author David J. Barnes and Michael Kolling
  * @version 2002-04-11
  */
-public class Fox extends Animal
-{
+public class Fox extends Animal{
     // Characteristics shared by all foxes (static fields).
     
     private static final int BREEDING_AGE = 10;
@@ -31,13 +30,12 @@ public class Fox extends Animal
      * 
      * @param randomAge If true, the fox will have random age and hunger level.
      */
-    public Fox(boolean randomAge)
-    {
+    public Fox(boolean randomAge){
         super(randomAge);
         if(randomAge){
             foodLevel = getRand().nextInt(RABBIT_FOOD_VALUE);
         }
-        else {
+        else{
             foodLevel = RABBIT_FOOD_VALUE;
         }
     }
@@ -48,13 +46,12 @@ public class Fox extends Animal
      * or die of old age.
      */
     @Override
-    public void act(SimulationContext context, Field currentField, Field updatedField, List<Animal> newborns)
-    {
+    public void act(SimulationContext context, Field currentField, Field updatedField, List<Animal> newborns){
         incrementAge();
         incrementHunger();
-        if(isAlive()) {
+        if(isAlive()){
             int births = breed(context);
-            for(int b = 0; b < births; b++) {
+            for(int b = 0; b < births; b++){
                 Fox newFox = new Fox(false);
                 newborns.add(newFox);
                 Location loc = updatedField.randomAdjacentLocation(getLocation());
@@ -62,14 +59,14 @@ public class Fox extends Animal
                 updatedField.place(newFox, loc);
             }
             Location newLocation = findFood(currentField, getLocation());
-            if(newLocation == null) {
+            if(newLocation == null){
                 newLocation = updatedField.freeAdjacentLocation(getLocation());
             }
-            if(newLocation != null) {
+            if(newLocation != null){
                 setLocation(newLocation);
                 updatedField.place(this, newLocation);
             }
-            else {
+            else{
                 setDead();
             }
         }
@@ -81,37 +78,36 @@ public class Fox extends Animal
     // incrementAge herdado de Animal
 
     @Override
-    protected int getMaxAge() {
+    protected int getMaxAge(){
         return MAX_AGE;
     }
 
     @Override
-    protected int getBreedingAge() {
+    protected int getBreedingAge(){
         return BREEDING_AGE;
     }
 
     @Override
-    protected double getBreedingProbability() {
+    protected double getBreedingProbability(){
         return BREEDING_PROBABILITY;
     }
 
     @Override
-    protected int getMaxLitterSize() {
+    protected int getMaxLitterSize(){
         return MAX_LITTER_SIZE;
     }
 
-    public static double getCreationProbability() {
+    public static double getCreationProbability(){
         return CREATION_PROBABILITY;
     }
     
     /**
      * Incrementa a fome da raposa. Isso pode levá-la a morte
      */
-    private void incrementHunger()
-    {
+    private void incrementHunger(){
         int dec = 1;
         foodLevel -= dec;
-        if(foodLevel <= 0) {
+        if(foodLevel <= 0){
             setDead();
         }
     }
@@ -122,25 +118,25 @@ public class Fox extends Animal
      * @param location Where in the field it is located.
      * @return Where food was found, or null if it wasn't.
      */
-    private Location findFood(Field field, Location location)
-    {
+    private Location findFood(Field field, Location location){
         Iterator<Location> adjacentLocations = field.adjacentLocations(location);
 
-        while(adjacentLocations.hasNext()) {
+        while(adjacentLocations.hasNext()){
             Location where = adjacentLocations.next();
             Object animal = field.getObjectAt(where);
-            if(animal instanceof Rabbit) {
+            if(animal instanceof Rabbit){
                 Rabbit rabbit = (Rabbit) animal;
-                if(rabbit.isAlive()) { 
+                if(rabbit.isAlive()){ 
                     rabbit.setEaten();
                     foodLevel = RABBIT_FOOD_VALUE;
                     return where;
                 }
-            } else if(animal instanceof Fish) {
+            } 
+            else if(animal instanceof Fish){
                 // Raposa na borda externa (terra) e peixe na borda interna (água)
-                if(!field.isWater(location) && field.isWater(where)) {
+                if(!field.isWater(location) && field.isWater(where)){
                     Fish fish = (Fish) animal;
-                    if(fish.isAlive()) {
+                    if(fish.isAlive()){
                         fish.setDead();
                         foodLevel = FISH_FOOD_VALUE;
                         return where;
