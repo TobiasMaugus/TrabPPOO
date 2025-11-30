@@ -9,7 +9,7 @@ javac -d bin src/*.java
 ### ▶️ Execução
 
 ```bash
-java -cp bin Principal
+java -cp bin Main
 ```
 
 ---
