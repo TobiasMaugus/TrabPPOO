@@ -6,17 +6,22 @@ import java.util.Map;
  * Representa configurações por espécie (cores, multiplicadores e fatores sazonais).
  */
 public class SpeciesConfigLoader{
+    /** Instância única da classe (Singleton). */
     private static SpeciesConfigLoader instanciaUnica;
 
-    // Mapa de cor por classe concreta
+    /** Mapa de cor por classe concreta de animal. */
     private Map<Animal, Color> colors;
-    // multiplicadores sazonais por espécie (nome simples lower -> fator)
+    
+    /** Multiplicadores sazonais gerais por nome de estação (nome simples lower -> fator). */
     private Map<String, Double> breedingMultiplierBySeasonName;
-    // multiplicadores sazonais por espécie específica: key = season:species
+    
+    /** Multiplicadores sazonais por espécie específica (chave: season:species). */
     private Map<String, Double> breedingMultiplierBySeasonAndSpecies;
-    // suscetibilidade à predação por espécie e estação: probabilidade de sucesso [0..1]
+    
+    /** Suscetibilidade à predação por espécie e estação: probabilidade de sucesso [0..1]. */
     private Map<String, Double> predationSusceptibilityBySeasonAndSpecies;
-    // disponibilidade de alimento para predadores (ex.: raposa) por estação (fator >= 0, >1 pior)
+    
+    /** Disponibilidade de alimento para predadores (ex.: raposa) por estação (fator >= 0). */
     private Map<String, Double> foodAvailabilityFactorBySeasonAndSpecies;
 
     /**
@@ -33,6 +38,7 @@ public class SpeciesConfigLoader{
     /**
      * Cria uma única configuração de espécies para todo o sistema. 
      * Utiliza o padrão Singleton
+     * @return A instância única do carregador de configurações.
      */
     public static SpeciesConfigLoader getInstance(){
         if(instanciaUnica == null){
@@ -42,13 +48,21 @@ public class SpeciesConfigLoader{
     }
 
     /**
-     * Gera chave para season:specie, com base no nome da estação e nome da espécie
-     *  
+     * Gera chave para season:specie, com base no nome da estação e nome da espécie.
+     * @param seasonName Nome da estação.
+     * @param species Instância do animal.
+     * @return A chave formatada "estação:espécie".
      */
     private static String key(String seasonName, Animal species){
         return key(seasonName, species.getClass().getSimpleName());
     }
 
+    /**
+     * Gera uma chave combinada de estação e nome da espécie.
+     * @param seasonName Nome da estação.
+     * @param speciesName Nome da espécie.
+     * @return A string chave no formato "estação:espécie".
+     */
     private static String key(String seasonName, String speciesName){
         return seasonName.toLowerCase() + ":" + speciesName.toLowerCase();
     }
@@ -76,8 +90,7 @@ public class SpeciesConfigLoader{
 
     /**
      * Retorna o multiplicador geral de reprodução para uma estação.
-     * 
-     * @param seasonName Nome da estação (case-insensitive).
+     * * @param seasonName Nome da estação (case-insensitive).
      * @return Multiplicador configurado ou 1.0 caso não exista.
      */
     private double getBreedingMultiplier(String seasonName){
@@ -165,5 +178,3 @@ public class SpeciesConfigLoader{
     }
 
 }
-
-

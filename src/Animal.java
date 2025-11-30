@@ -65,6 +65,11 @@ public abstract class Animal {
         return births;
     }
 
+    /**
+     * Verifica a igualdade entre este animal e outro objeto.
+     * @param obj O objeto a ser comparado.
+     * @return true se forem o mesmo objeto ou da mesma classe, false caso contrário.
+     */
     @Override
     public boolean equals(Object obj) {
         if (this == obj)
@@ -74,6 +79,10 @@ public abstract class Animal {
         return true;
     }
 
+    /**
+     * Retorna o código hash baseado na classe do animal.
+     * @return O valor do hash code.
+     */
     @Override
     public int hashCode() {
         return getClass().hashCode();
@@ -88,30 +97,59 @@ public abstract class Animal {
 
     /** Getters e setters básicos. */
 
+    /**
+     * Verifica se o animal está vivo.
+     * @return true se o animal estiver vivo, false caso contrário.
+     */
     public boolean isAlive() {
         return alive;
     }
 
+    /**
+     * Obtém a instância do gerador de números aleatórios.
+     * @return O objeto Random compartilhado.
+     */
     protected static Random getRand() {
         return rand;
     }
 
+    /**
+     * Obtém a idade atual do animal.
+     * @return A idade em passos da simulação.
+     */
     public int getAge() {
         return age;
     }
 
+    /**
+     * Obtém a localização atual do animal.
+     * @return O objeto Location representando a posição no campo.
+     */
     public Location getLocation() {
         return location;
     }
 
+    /**
+     * Define a localização do animal baseada em coordenadas de linha e coluna.
+     * @param row A coordenada da linha.
+     * @param col A coordenada da coluna.
+     */
     protected void setLocation(int row, int col) {
         this.location = new Location(row, col);
     }
 
+    /**
+     * Define a localização do animal utilizando um objeto Location.
+     * @param location A nova localização.
+     */
     protected void setLocation(Location location) {
         this.location = location;
     }
 
+    /**
+     * Marca o animal como morto.
+     * Define o estado 'alive' como false.
+     */
     protected void setDead() {
         alive = false;
     }

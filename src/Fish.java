@@ -35,6 +35,10 @@ public class Fish extends Animal {
      * - possivelmente gerar novos peixes
      * - tentar mover-se para uma célula adjacente de água
      * - morrer em caso de superlotação
+     * * @param context Contexto da simulação (estação, configurações, etc).
+     * @param currentField O campo atual (estado imutável neste turno).
+     * @param updatedField O campo atualizado para onde os animais se movem.
+     * @param newborns Lista onde os novos filhotes gerados serão adicionados.
      */
     @Override
     public void act(SimulationContext context, Field currentField, Field updatedField, List<Animal> newborns) {
@@ -64,21 +68,33 @@ public class Fish extends Animal {
         }
     }
 
+    /**
+     * @return A idade máxima permitida para esta espécie.
+     */
     @Override
     protected int getMaxAge() {
         return MAX_AGE;
     }
 
+    /**
+     * @return A idade mínima para começar a reproduzir.
+     */
     @Override
     protected int getBreedingAge() {
         return BREEDING_AGE;
     }
 
+    /**
+     * @return A probabilidade de reprodução desta espécie.
+     */
     @Override
     protected double getBreedingProbability() {
         return BREEDING_PROBABILITY;
     }
 
+    /**
+     * @return O tamanho máximo da ninhada.
+     */
     @Override
     protected int getMaxLitterSize() {
         return MAX_LITTER_SIZE;
@@ -86,6 +102,7 @@ public class Fish extends Animal {
 
     /**
      * Probabilidade de criação inicial de peixes no campo.
+     * @return O valor da probabilidade de criação.
      */
     public static double getCreationProbability() {
         return CREATION_PROBABILITY;

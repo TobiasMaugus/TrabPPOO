@@ -36,6 +36,7 @@ public class FieldStats {
     /**
      * Incrementa o contador da espécie correspondente.
      * Caso a espécie ainda não possua um contador, um novo é criado.
+     * @param animalClass O animal cuja espécie será contabilizada.
      */
     public void incrementCount(Animal animalClass) {
         Counter counter = counters.get(animalClass);
@@ -49,6 +50,8 @@ public class FieldStats {
     /**
      * Retorna o nome a ser exibido para a classe do animal.
      * Realiza pluralização simples para algumas espécies.
+     * @param animalClass O animal do qual se deseja o nome de exibição.
+     * @return O nome formatado (ex: "foxes" para "fox").
      */
     private String getDisplayName(Animal animalClass) {
         String simple = animalClass.getClass().getSimpleName().toLowerCase();
@@ -65,6 +68,7 @@ public class FieldStats {
 
     /**
      * Verifica se a simulação ainda é viável, ou seja, se mais de uma espécie está viva.
+     * @param field O campo atual da simulação.
      * @return true se houver mais de uma espécie com contagem maior que zero.
      */
     public boolean isViable(Field field) {
@@ -85,6 +89,7 @@ public class FieldStats {
     /**
      * Gera as contagens de todas as espécies presentes no campo.
      * A contagem só é atualizada quando solicitada.
+     * @param field O campo onde os animais estão localizados.
      */
     private void generateCounts(Field field) {
         reset();

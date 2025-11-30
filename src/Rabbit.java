@@ -40,6 +40,10 @@ public class Rabbit extends Animal {
      * - Pode se reproduzir
      * - Tenta se mover para uma posição adjacente
      * - Caso não haja para onde ir, morre por superlotação
+     * @param context Contexto da simulação (estação, etc).
+     * @param currentField O campo no estado atual.
+     * @param updatedField O campo onde as atualizações serão aplicadas.
+     * @param newborns Lista onde os novos filhotes serão adicionados.
      */
     @Override
     public void act(SimulationContext context, Field currentField, Field updatedField, List<Animal> newborns) {
@@ -73,27 +77,41 @@ public class Rabbit extends Animal {
         }
     }
 
+    /**
+     * @return A idade máxima desta espécie.
+     */
     @Override
     protected int getMaxAge() {
         return MAX_AGE;
     }
 
+    /**
+     * @return A idade mínima para reprodução.
+     */
     @Override
     protected int getBreedingAge() {
         return BREEDING_AGE;
     }
 
+    /**
+     * @return A probabilidade de reprodução desta espécie.
+     */
     @Override
     protected double getBreedingProbability() {
         return BREEDING_PROBABILITY;
     }
 
+    /**
+     * @return O tamanho máximo da ninhada.
+     */
     @Override
     protected int getMaxLitterSize() {
         return MAX_LITTER_SIZE;
     }
 
-    /** Probabilidade usada somente na criação inicial do campo. */
+    /** * Probabilidade usada somente na criação inicial do campo.
+     * @return O valor da probabilidade de criação.
+     */
     public static double getCreationProbability() {
         return CREATION_PROBABILITY;
     }

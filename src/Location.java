@@ -21,6 +21,8 @@ public class Location{
     /**
      * Verifica igualdade de conteúdo entre duas localizações.
      * Duas Location são iguais se possuem mesma linha e coluna.
+     * @param obj O objeto a ser comparado com esta localização.
+     * @return true se os objetos representarem a mesma posição (linha e coluna iguais).
      */
     @Override
     public boolean equals(Object obj){
@@ -35,6 +37,7 @@ public class Location{
     
     /**
      * Retorna representação textual no formato "linha,coluna".
+     * @return Uma string contendo as coordenadas separadas por vírgula.
      */
     @Override
     public String toString(){
@@ -44,6 +47,7 @@ public class Location{
     /**
      * Gera um hash code baseado nos valores de linha e coluna.
      * Usa 16 bits superiores para a linha e 16 inferiores para a coluna.
+     * @return O valor inteiro do hash code.
      */
     @Override
     public int hashCode(){

@@ -8,8 +8,9 @@ public class SimulationConfigLoader{
     
     /**
      * Carrega as configurações de simulação definidas em um arquivo.txt
-     * 
-     * @param filePath Caminho do arquivo
+     * * @param filePath Caminho do arquivo
+     * @return A instância de configuração preenchida com os dados do arquivo.
+     * @throws IOException Caso ocorra erro na leitura do arquivo.
      */
     public static SimulationConfig loadFromFile(String filePath) throws IOException{
         SimulationConfig config = SimulationConfig.getInstance();

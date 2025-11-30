@@ -4,8 +4,7 @@
  */
 public class SeasonCycle {
 
-    /** 
-     * Vetor contendo as fases (estações) que compõem o ciclo. 
+    /** * Vetor contendo as fases (estações) que compõem o ciclo. 
      * A ordem define a sequência do ciclo.
      */
     private final SeasonPhase[] phases;
@@ -67,6 +66,3 @@ public class SeasonCycle {
         return phases[phases.length - 1];
     }
 }
-
-
-

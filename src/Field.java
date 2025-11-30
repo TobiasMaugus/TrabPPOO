@@ -72,6 +72,9 @@ public class Field {
 
     /**
      * Retorna o animal na posição (linha, coluna), caso exista.
+     * @param row A linha da posição.
+     * @param col A coluna da posição.
+     * @return O animal encontrado ou null.
      */
     public Animal getObjectAt(int row, int col) {
         return field[row][col];
@@ -101,12 +104,21 @@ public class Field {
         }
     }
 
-    /** Verifica se a posição informada é água. */
+    /**
+     * Verifica se a posição informada é água.
+     * @param location A localização a ser verificada.
+     * @return true se for água, false caso contrário.
+     */
     public boolean isWater(Location location) {
         return isWater(location.getRow(), location.getCol());
     }
 
-    /** Verifica se a posição (linha, coluna) é água. */
+    /**
+     * Verifica se a posição (linha, coluna) é água.
+     * @param row A linha da coordenada.
+     * @param col A coluna da coordenada.
+     * @return true se for água, false caso contrário.
+     */
     public boolean isWater(int row, int col) {
         return water[row][col];
     }
@@ -114,6 +126,8 @@ public class Field {
     /**
      * Gera uma posição aleatória adjacente à informada, dentro dos limites.
      * Pode retornar a própria posição original.
+     * @param location A localização de referência.
+     * @return Uma localização adjacente válida ou a própria localização.
      */
     public Location randomAdjacentLocation(Location location) {
         int row = location.getRow();
@@ -140,6 +154,8 @@ public class Field {
     /**
      * Encontra uma posição livre adjacente (não água). Caso não haja,
      * retorna a própria posição se estiver livre; senão, null.
+     * @param location A localização de referência.
+     * @return Uma localização livre adjacente, a própria se livre, ou null.
      */
     public Location freeAdjacentLocation(Location location) {
         Iterator<Location> adjacent = adjacentLocations(location);
@@ -158,6 +174,8 @@ public class Field {
 
     /**
      * Encontra posição livre adjacente que seja água.
+     * @param location A localização de referência.
+     * @return Uma localização de água adjacente e livre, ou null.
      */
     public Location freeAdjacentWaterLocation(Location location) {
         Iterator<Location> adjacent = adjacentLocations(location);
@@ -176,6 +194,8 @@ public class Field {
     /**
      * Retorna localização adjacente aleatória que seja água,
      * ou a atual caso nenhuma exista.
+     * @param location A localização de referência.
+     * @return Uma localização de água adjacente ou a própria localização.
      */
     public Location randomAdjacentWaterLocation(Location location) {
         java.util.Iterator<Location> adjacent = adjacentLocations(location);
@@ -190,6 +210,8 @@ public class Field {
 
     /**
      * Gera um iterador para posições adjacentes embaralhadas.
+     * @param location A localização central.
+     * @return Um iterador sobre as localizações vizinhas.
      */
     public java.util.Iterator<Location> adjacentLocations(Location location) {
         int row = location.getRow();

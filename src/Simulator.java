@@ -8,45 +8,55 @@ import java.awt.Color;
 /**
  * Um simulador simples de predador–presa, baseado em um campo contendo
  * coelhos, raposas e peixes, com suporte a configuração externa e ciclos sazonais.
- * 
- * Controla o estado da simulação, a progressão dos passos, as listas de animais,
+ * * Controla o estado da simulação, a progressão dos passos, as listas de animais,
  * e a interação com a interface gráfica.
- * 
- * @author João Gabriel Salomão Baldim
+ * * @author João Gabriel Salomão Baldim
  * @author Luis Kennedy Gervásio Turola
  * @author Thaís Giovanna Lopes
  * @author Tobias Maugus Bueno Cougo
- * 
- * Adaptado de: David J. Barnes e Michael Kolling (2002).
+ * * Adaptado de: David J. Barnes e Michael Kolling (2002).
  */
 public class Simulator{
-    // Lista de todos os animais vivos no campo.
+    /** Lista de todos os animais vivos no campo. */
     private List<Animal> animals;
-    // Lista de animais nascidos durante o passo atual.
+    
+    /** Lista de animais nascidos durante o passo atual. */
     private List<Animal> newAnimals;
-    // Campo atual da simulação.
+    
+    /** Campo atual da simulação. */
     private Field field;
-    // Segundo campo usado para calcular o próximo estado.
+    
+    /** Segundo campo usado para calcular o próximo estado. */
     private Field updatedField;
-    // Contador de passos da simulação.
+    
+    /** Contador de passos da simulação. */
     private int step;
-    // Interface gráfica da simulação.
+    
+    /** Interface gráfica da simulação. */
     private SimulatorView view;
-    // Estado da execução (rodando / pausado).
+    
+    /** Estado da execução (rodando / pausado). */
     private volatile boolean running = false;
+    
+    /** Thread responsável pelo loop de execução da simulação. */
     private Thread simThread;
-    // Velocidade da simulação (1–15).
+    
+    /** Velocidade da simulação (1–15). */
     private volatile int speedLevel = 1;
 
-    // Contexto da simulação com Random e configurações.
+    /** Contexto da simulação com Random e configurações. */
     private static SimulationContext context;
+    
+    /** Carregador singleton de configurações de espécies. */
     private static SpeciesConfigLoader speciesConfig = SpeciesConfigLoader.getInstance();
+    
+    /** Configuração geral da simulação (singleton). */
     private static SimulationConfig simulationConfig = SimulationConfig.getInstance();
 
-    // Ciclo sazonal atual.
+    /** Ciclo sazonal atual. */
     private SeasonCycle seasonCycle;
     
-    // Configuração de múltiplos lagos (cada item: {linha, coluna, altura, largura})
+    /** Configuração de múltiplos lagos (cada item: {linha, coluna, altura, largura}). */
     private List<int[]> lakes = new ArrayList<int[]>();
 
     /**
@@ -165,6 +175,7 @@ public class Simulator{
     }
 
     /**
+     * Verifica se a simulação está em execução.
      * @return true se a simulação está em execução.
      */
     public synchronized boolean isRunning() {
@@ -202,6 +213,7 @@ public class Simulator{
     }
     
     /**
+     * Retorna o nível de velocidade atual.
      * @return o nível atual de velocidade da simulação.
      */
     public synchronized int getSpeedLevel() {
@@ -211,8 +223,7 @@ public class Simulator{
     /**
      * Carrega configurações completas de um arquivo externo,
      * incluindo dimensões, estações, lagos e parâmetros.
-     * 
-     * @param configFilePath Caminho do arquivo JSON/YAML de configuração.
+     * * @param configFilePath Caminho do arquivo JSON/YAML de configuração.
      * @throws Exception caso o arquivo seja inválido.
      */
     public void loadConfiguration(String configFilePath) throws Exception {
@@ -247,6 +258,7 @@ public class Simulator{
     /**
      * Popula o campo inicial com raposas, coelhos e peixes,
      * seguindo as probabilidades definidas nas configurações.
+     * @param field O campo a ser populado.
      */
     private void populate(Field field)
     {
@@ -296,6 +308,7 @@ public class Simulator{
 
     /**
      * Define nome, duração e cores iniciais das estações por padrão.
+     * @return Um ciclo de estações padrão.
      */
     private static SeasonCycle defaultSeasonCycle() {
         SeasonPhase spring = new SeasonPhase("spring", 100, new Color(141,182,0), new Color(42,157,244));

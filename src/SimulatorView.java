@@ -10,42 +10,54 @@ import java.util.Set;
 
 /**
  * Janela gráfica responsável por exibir o estado atual da simulação.
- * 
- * A classe desenha o campo (grid) da simulação, mostrando cada posição com
+ * * A classe desenha o campo (grid) da simulação, mostrando cada posição com
  * uma cor correspondente ao tipo de elemento presente (animal, água ou espaço vazio).
  * Também exibe informações como passo atual, estação do ano, arquivo de configuração
  * carregado e velocidade da simulação.
- * 
- * Possui ainda controles para iniciar, pausar, redefinir a simulação,
+ * * Possui ainda controles para iniciar, pausar, redefinir a simulação,
  * alterar a velocidade e carregar arquivos de configuração.
  */
 public class SimulatorView extends JFrame{
-    // Cores usadas para locais vazios.
+    /** Cor padrão usada para locais vazios (terra). */
     private static final Color DEFAULT_EMPTY_COLOR = Color.white;
+    
+    /** Cor padrão usada para locais com água. */
     private static final Color DEFAULT_WATER_COLOR = new Color(180, 220, 255);
 
-    // Cor usada para objetos sem cor definida.
+    /** Cor usada para objetos sem cor definida. */
     private static final Color UNKNOWN_COLOR = Color.gray;
 
+    /** Prefixo para o texto do contador de passos. */
     private final String STEP_PREFIX = "Step: ";
+    
+    /** Prefixo para o texto da estação do ano. */
     private final String SEASON_PREFIX = "Season: ";
+    
+    /** Prefixo para o texto de população. */
     private final String POPULATION_PREFIX = "Population: ";
+    
+    /** Rótulos da interface para exibir status e informações. */
     private JLabel stepLabel, seasonLabel, population, configFileLabel, speedLabel;
+    
+    /** Componente customizado que desenha o grid. */
     private FieldView fieldView;
+    
+    /** Painel para exibir a legenda de cores das espécies. */
     private JPanel legendPanel;
     
-    // Mapa que armazena cores das espécies.
+    /** Mapa que armazena cores das espécies. */
     private HashMap<Animal, Color> colors;
 
-    // Estatísticas do campo.
+    /** Estatísticas do campo. */
     private FieldStats stats;
 
-    // Carregador de configurações de espécies.
+    /** Carregador de configurações de espécies. */
     private final SpeciesConfigLoader speciesConfig = SpeciesConfigLoader.getInstance();
 
-    // Referência ao simulador principal.
+    /** Referência ao simulador principal. */
     private final Simulator simulator;
 
+    /** A fase da estação atual. */
     private SeasonPhase currentSeasonPhase;
 
     /**
@@ -216,7 +228,7 @@ public class SimulatorView extends JFrame{
      * Exibe o estado atual da simulação no grid.
      *
      * @param step Passo atual da simulação.
-     * @param stats Estatísticas do campo.
+     * @param field O campo contendo os animais.
      * @param seasonName Nome da estação atual.
      */
     public void showStatus(int step, Field field, String seasonName){
@@ -353,12 +365,22 @@ public class SimulatorView extends JFrame{
      * da simulação em forma de grade colorida.
      */
     private class FieldView extends JPanel{
+        /** Fator de escala para o tamanho da visualização do grid. */
         private final int GRID_VIEW_SCALING_FACTOR = 10;
 
+        /** Dimensões do grid (largura e altura) em número de células. */
         private int gridWidth, gridHeight;
+        
+        /** Escala de desenho nos eixos X e Y. */
         private int xScale, yScale;
+        
+        /** Tamanho atual do componente. */
         Dimension size;
+        
+        /** Contexto gráfico utilizado para desenho. */
         private Graphics g;
+        
+        /** Buffer de imagem onde o campo é desenhado antes de ser exibido. */
         private Image fieldImage;
 
         /**
